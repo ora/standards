@@ -1,8 +1,16 @@
 {
-  "name": "agentic-web-standards",
+  "name": "ax-guide",
   "version": "0.1.0",
   "private": true,
-  "description": "A plain-language, open-source guide to the open standards that let AI agents find, use, sign in to, shop on and pay websites.",
+  "description": "ax.guide, the Agentic-Web Cheatsheet: an open, plain-language guide to the standards that let AI agents find, use, sign in to, shop on and pay websites.",
+  "homepage": "https://ax.guide",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ora/standards.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ora/standards/issues"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -13,7 +21,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "readme": "UPDATE_README=1 vitest run tests/readme.test.ts"
   },
   "dependencies": {
     "marked": "18.1.0",

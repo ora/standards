@@ -1,1 +1,8 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Read the guide
+    url: https://ax.guide
+    about: The live site. Each standard's page has an "Edit on GitHub" button for quick fixes.
+  - name: Report a security issue
+    url: https://github.com/ora/standards/security/advisories/new
+    about: Please report vulnerabilities privately, not in a public issue.
