@@ -1,0 +1,32 @@
+{
+  "eyebrow": "An open field guide",
+  "heading": "The agentic web, standard by standard",
+  "lede": "Agents are the new browsers. Since mid-2025, a dozen open standards have appeared to teach websites how to deal with them. They're young, they overlap, and the press releases make all of them sound finished. Here is what each one does, who's behind it, and how real it is today.",
+  "mapHeading": "The map",
+  "mapLede": "Read it left to right as an agent's visit: find what's offered, use the site, prove who it is, shop, then pay.",
+  "filterLabel": "Show",
+  "filterAll": "All",
+  "patternsHeading": "What's real, what's hype",
+  "patterns": [
+    {
+      "title": "Platforms move faster than standards bodies.",
+      "body": "The standards with real traffic are the ones a big platform switched on: Shopify accounts for most of UCP's 15,000+ verified storefronts and puts WebMCP tools on every standard storefront; Visa and Mastercard build on Web Bot Auth; OpenAI pipes ACP feeds into ChatGPT. The drafts with the most impressive partner lists are often the ones with no known deployments."
+    },
+    {
+      "title": "Partner lists aren't adoption, and transaction counts aren't commerce.",
+      "body": "A design-partner list isn't a deployment list, and 100 million+ cumulative transactions can sit next to about $28,000 a day of real payments. When you read an announcement, ask two questions: who has actually turned it on, and how much real money moves through it?"
+    },
+    {
+      "title": "The plumbing is still settling.",
+      "body": "File names are shifting (ai-catalog and ARD split into publishing and discovery formats within months), APIs are still changing mid-trial, and the headline commerce experiment of the past year, buying inside ChatGPT, was scaled back. Build in a way that survives that: one source of truth, published in more than one place."
+    }
+  ],
+  "next": {
+    "heading": "Where to next",
+    "items": [
+      { "title": "Compare them side by side", "body": "All twelve on one screen, plus the pairs people mix up.", "href": "/compare" },
+      { "title": "Find the one you need", "body": "Start from what you're building, not from the acronym.", "href": "/which" },
+      { "title": "Fix or add a standard", "body": "Every page is a file. Open a pull request.", "href": "/contribute" }
+    ]
+  }
+}

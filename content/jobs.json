@@ -1,0 +1,7 @@
+[
+  { "id": "find", "number": 1, "name": "Find", "verb": "find what a site offers", "description": "Help an agent find the tools, APIs and agents a website offers." },
+  { "id": "act", "number": 2, "name": "Act", "verb": "use the site", "description": "Let an agent use the site directly, instead of guessing at buttons." },
+  { "id": "identity", "number": 3, "name": "Identity", "verb": "prove who it is", "description": "Prove which agent is visiting, and whom it acts for." },
+  { "id": "shop", "number": 4, "name": "Shop", "verb": "shop", "description": "Let an agent browse a catalog, fill a cart and check out." },
+  { "id": "pay", "number": 5, "name": "Pay", "verb": "pay", "description": "Let an agent pay, with proof that a person agreed." }
+]

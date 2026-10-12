@@ -1,0 +1,49 @@
+{
+  "siteName": "Agentic Web Standards",
+  "shortName": "agentic/web",
+  "metadata": {
+    "title": "Agentic Web Standards: the open standards for AI agents, in plain words",
+    "description": "An open, plain-language field guide to the standards that let AI agents find, use, sign in to, shop on and pay websites. What each one does, who is behind it, and how real it is today.",
+    "image": {
+      "alt": "Agentic Web Standards: twelve standards, five jobs, grouped by what each does for an AI agent",
+      "heading": "The agentic web, standard by standard",
+      "line": "What each one does, who is behind it, and how real it is today."
+    }
+  },
+  "skipLink": "Skip to main content",
+  "homeLinkLabel": "Agentic Web Standards home",
+  "nav": {
+    "label": "Main",
+    "items": [
+      { "label": "Map", "href": "/" },
+      { "label": "Compare", "href": "/compare" },
+      { "label": "Which one?", "href": "/which" },
+      { "label": "Contribute", "href": "/contribute" }
+    ]
+  },
+  "statuses": {
+    "production": { "label": "In production", "short": "Production", "description": "Carries real traffic today." },
+    "early": { "label": "Early use", "short": "Early", "description": "Some real use, still settling." },
+    "draft": { "label": "Draft", "short": "Draft", "description": "Written down, not yet deployed." }
+  },
+  "repo": {
+    "url": "https://github.com/ora/standards",
+    "branch": "main",
+    "newIssueUrl": "https://github.com/ora/standards/issues/new"
+  },
+  "staleAfterDays": 90,
+  "footer": {
+    "about": "An open, community-edited guide. Every page is a file in a public repository, so anyone can fix a sentence or add a standard with a pull request.",
+    "maintainedBy": { "before": "Maintained by ", "text": "Ora", "href": "https://ora.ai", "after": " and contributors." },
+    "license": {
+      "before": "Code under the ",
+      "code": { "text": "MIT License", "href": "https://github.com/ora/standards/blob/main/LICENSE" },
+      "middle": ". Words under ",
+      "content": { "text": "CC BY 4.0", "href": "https://creativecommons.org/licenses/by/4.0/" },
+      "after": ", so anyone can reuse them with credit."
+    },
+    "linksLabel": "Footer",
+    "github": "GitHub",
+    "reportError": "Report an error"
+  }
+}

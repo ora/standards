@@ -1,0 +1,26 @@
+name: Report an error
+description: Something on the site is wrong, out of date or unclear.
+title: "Correction: "
+labels: [correction]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The page address, such as /standards/webmcp.
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong?
+      description: Quote the sentence if you can.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: A link that shows the correct information, ideally a primary source.
+    validations:
+      required: false

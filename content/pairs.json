@@ -1,0 +1,39 @@
+[
+  {
+    "id": "ard-vs-ai-catalog",
+    "title": "ARD vs ai-catalog",
+    "summary": "Discovery vs. publishing. Serve both.",
+    "sides": [
+      { "id": "ard", "says": "The discovery format. Registries crawl it and answer searches." },
+      { "id": "ai-catalog", "says": "The publishing format. Your site's list of its AI offerings." }
+    ]
+  },
+  {
+    "id": "ucp-vs-acp",
+    "title": "UCP vs ACP",
+    "summary": "Any assistant vs. ChatGPT.",
+    "sides": [
+      { "id": "ucp", "says": "A shared shopping language any assistant can use, from catalog to order." },
+      { "id": "acp", "says": "Your products, and optionally checkout, inside ChatGPT." }
+    ]
+  },
+  {
+    "id": "mpp-vs-x402",
+    "title": "MPP vs x402",
+    "summary": "Cards and stablecoins via Stripe vs. stablecoin payments per request under a neutral foundation.",
+    "sides": [
+      { "id": "mpp", "says": "Cards or stablecoins through Stripe, with sessions and subscriptions." },
+      { "id": "x402", "says": "Stablecoin payments per request, owned by a neutral foundation." }
+    ]
+  },
+  {
+    "id": "identity-trio",
+    "title": "Web Bot Auth vs auth.md vs Poppy",
+    "summary": "Which bot is this, sign up a new user, act for an existing customer.",
+    "sides": [
+      { "id": "web-bot-auth", "says": "Which bot is this?" },
+      { "id": "auth-md", "says": "Sign up a new user." },
+      { "id": "poppy", "says": "Act for an existing customer." }
+    ]
+  }
+]

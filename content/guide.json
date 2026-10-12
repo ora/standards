@@ -1,0 +1,17 @@
+{
+  "heading": "Which one do I need?",
+  "lede": "Start from what you're building. Each line names the standard to look at first.",
+  "items": [
+    { "situation": "You offer APIs, MCP servers or agents and want to be found", "standards": ["ard", "ai-catalog"], "note": "Serve the same file at both ard.json and ai-catalog.json." },
+    { "situation": "Agents use your site inside people's browsers", "standards": ["webmcp"], "note": "Add tools to your key flows, and keep the normal page." },
+    { "situation": "You have lots of structured content people and agents want to query", "standards": ["nlweb"] },
+    { "situation": "Your bot visits other sites, or you need to verify bots on yours", "standards": ["web-bot-auth"] },
+    { "situation": "You want agents to create accounts on your service without a sign-up form", "standards": ["auth-md"] },
+    { "situation": "Customers' own agents should sign in and act on their accounts", "standards": ["poppy"], "note": "Track it; Draft 0.1 is from October 9, 2026." },
+    { "situation": "You sell goods and want any AI assistant to browse, cart and check out", "standards": ["ucp"] },
+    { "situation": "You want your products shown in ChatGPT", "standards": ["acp"] },
+    { "situation": "An agent pays and you need proof a person approved those exact terms", "standards": ["ap2"] },
+    { "situation": "Agents pay per call or by the minute, with cards or stablecoins", "standards": ["mpp"] },
+    { "situation": "You charge per API request in stablecoins, with no accounts", "standards": ["x402"] }
+  ]
+}

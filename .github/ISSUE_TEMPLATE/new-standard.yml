@@ -1,0 +1,44 @@
+name: Suggest a standard
+description: An open standard for how AI agents work with websites that the guide should cover.
+title: "New standard: "
+labels: [new-standard]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Name
+    validations:
+      required: true
+  - type: input
+    id: spec
+    attributes:
+      label: Link to the spec
+      description: The guide only covers standards anyone can read.
+    validations:
+      required: true
+  - type: dropdown
+    id: job
+    attributes:
+      label: Which job does it do for an agent?
+      options:
+        - Find
+        - Act
+        - Identity
+        - Shop
+        - Pay
+        - None of these (tell us below)
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What does it do, and who uses it?
+      description: Links to real deployments help us set its status.
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Want to write it?
+      options:
+        - label: I'll open a pull request using content/standards/_template.md
