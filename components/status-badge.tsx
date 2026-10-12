@@ -1,21 +1,12 @@
 import { statusLabel } from "@/lib/content";
 import type { StatusId } from "@/lib/schema";
 
-/** A status dot, with its label shown or read out. */
-export function StatusBadge({
-  status,
-  variant = "plain",
-  hideLabel = false,
-}: {
-  status: StatusId;
-  variant?: "plain" | "pill";
-  hideLabel?: boolean;
-}) {
-  const label = statusLabel(status);
+/** A status mark with its label: filled for real traffic, half for early use, dashed for a draft. */
+export function StatusBadge({ status, variant = "plain" }: { status: StatusId; variant?: "plain" | "pill" }) {
   return (
     <span className={`status status--${status}${variant === "pill" ? " status--pill" : ""}`}>
-      <span className="status__dot" aria-hidden="true" />
-      {hideLabel ? <span className="visually-hidden">{label}</span> : label}
+      <span className="status__mark" aria-hidden="true" />
+      {statusLabel(status)}
     </span>
   );
 }

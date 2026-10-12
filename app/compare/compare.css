@@ -1,39 +1,42 @@
 /* The comparison table and the pairs people mix up. */
 
 .table-scroll {
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  overflow: hidden;
+  border: var(--border);
+  background: var(--color-card);
+  box-shadow: var(--shadow);
 }
 
 .compare-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .compare-table thead th {
-  padding: var(--space-4) var(--space-5);
-  border-block-end: 1px solid var(--color-rule);
-  color: var(--color-ink-muted);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-ink);
+  color: var(--color-paper);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
-  font-weight: 400;
-  letter-spacing: 0.05em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-align: start;
   text-transform: uppercase;
 }
 
 .compare-table__group th {
-  padding: var(--space-6) var(--space-5) var(--space-2);
+  padding: var(--space-6) var(--space-4) 0;
   text-align: start;
 }
 
+.compare-table__group .bar {
+  display: inline-flex;
+}
+
 .compare-table tbody tr:not(.compare-table__group) > * {
-  padding: var(--space-4) var(--space-5);
-  border-block-end: 1px solid var(--color-rule);
+  padding: var(--space-4);
+  border-block-end: var(--border-thin);
   text-align: start;
   vertical-align: top;
 }
@@ -42,25 +45,23 @@
   border-block-end: 0;
 }
 
-.compare-table tbody tr:not(.compare-table__group) {
-  transition: background-color 150ms ease;
-}
-
-.compare-table tbody tr:not(.compare-table__group):hover {
-  background-color: color-mix(in oklab, var(--hue) 5%, transparent);
+.compare-table tbody tr[data-status="production"] th[scope="row"] {
+  box-shadow: inset 8px 0 0 var(--accent);
 }
 
 .compare-table__name {
-  font-family: var(--font-serif);
   font-size: 1.5rem;
-  font-weight: 400;
-  line-height: 1.1;
-  text-decoration-color: color-mix(in oklab, var(--hue) 60%, transparent);
+  font-weight: 900;
+  font-stretch: 100%;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  text-decoration: none;
   white-space: nowrap;
 }
 
 .compare-table__name:hover {
-  color: var(--hue);
+  background-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .compare-table__muted {
@@ -75,7 +76,8 @@
 }
 
 .compare-table th[scope="row"] {
-  width: 10rem;
+  width: 11rem;
+  padding-inline-start: var(--space-5) !important;
 }
 
 .compare-table td:last-child {
@@ -87,6 +89,7 @@
   .table-scroll {
     border: 0;
     background: transparent;
+    box-shadow: none;
   }
 
   .compare-table,
@@ -113,13 +116,20 @@
   .compare-table tbody tr:not(.compare-table__group) {
     margin-block-end: var(--space-3);
     padding: var(--space-5);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius);
-    background: var(--color-surface);
+    border: var(--border);
+    background: var(--color-card);
+  }
+
+  .compare-table tbody tr[data-status="production"] {
+    box-shadow: inset 8px 0 0 var(--accent);
+  }
+
+  .compare-table tbody tr[data-status="production"] th[scope="row"] {
+    box-shadow: none;
   }
 
   .compare-table tbody tr:not(.compare-table__group) > * {
-    padding: 0;
+    padding: 0 !important;
     border: 0;
   }
 
@@ -131,10 +141,9 @@
     content: attr(data-label);
     display: block;
     margin-block-end: var(--space-1);
-    color: var(--color-ink-muted);
     font-family: var(--font-mono);
     font-size: var(--text-2xs);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 }
@@ -148,13 +157,13 @@
 .pairs__list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-6);
+  gap: var(--space-8);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-@media (min-width: 56rem) {
+@media (min-width: 60rem) {
   .pairs__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -165,57 +174,82 @@
   align-content: start;
   gap: var(--space-3);
   padding: var(--space-6);
-  border: 1px solid var(--color-rule);
-  border-radius: var(--radius);
-  background: var(--color-surface);
+  border: var(--border);
+  background: var(--color-card);
 }
 
 .pair__title {
-  font-size: 1.875rem;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  text-transform: uppercase;
 }
 
 .pair__summary {
-  color: var(--color-ink-muted);
-  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 .pair__sides {
   display: grid;
-  gap: var(--space-3);
-  margin: var(--space-3) 0 0;
-  padding: 0;
+  grid-auto-flow: row;
+  gap: var(--space-6);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4) 0 0;
+  border-block-start: var(--border);
   list-style: none;
 }
 
 @media (min-width: 30rem) {
-  .pair__sides--2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .pair__sides--3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .pair__sides {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    column-gap: var(--space-12);
   }
 }
 
 .pair__side {
+  position: relative;
   display: grid;
   align-content: start;
   gap: var(--space-2);
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: color-mix(in oklab, var(--hue) 8%, var(--color-sunken));
-  box-shadow: inset 0 3px 0 var(--hue);
   font-size: var(--text-sm);
   line-height: 1.45;
 }
 
+.pair__vs {
+  display: inline-block;
+  justify-self: start;
+  padding: 0 0.35em;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+}
+
+@media (min-width: 30rem) {
+  .pair__vs {
+    position: absolute;
+    inset-block-start: 0.35rem;
+    inset-inline-start: calc(-1 * var(--space-12) / 2 - 0.8rem);
+  }
+}
+
 .pair__name {
-  font-family: var(--font-serif);
-  font-size: 1.375rem;
-  line-height: 1.1;
+  justify-self: start;
+  font-size: 1.75rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
   text-decoration: none;
 }
 
+.pair__side[data-status="production"] .pair__name {
+  background-color: var(--accent);
+  color: var(--on-accent);
+  padding: 0 0.1em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .pair__name:hover {
-  color: var(--hue);
+  text-decoration: underline;
 }

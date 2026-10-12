@@ -16,7 +16,7 @@ export default function ContributePage() {
   return (
     <div className="wrap contribute">
       <header className="page-intro">
-        <p className="eyebrow">Open source</p>
+        <p className="kicker">Open source</p>
         <h1 className="page-title">Every page is a file. Make it better.</h1>
         <p className="lede">
           These standards change every month, and no one person can keep up. If you spot something wrong or
@@ -24,7 +24,7 @@ export default function ContributePage() {
         </p>
         <p className="contribute__actions">
           <a href={content.repo.url} className="button button--primary">
-            Open the repository <span className="arrow" aria-hidden="true">↗</span>
+            Open the repository ↗
           </a>
           <a href={`${content.repo.newIssueUrl}/choose`} className="button">
             Suggest a standard

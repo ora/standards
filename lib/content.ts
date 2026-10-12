@@ -35,3 +35,24 @@ export function reportErrorHref(pathname: string): string {
 export function formatDate(date: string): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
 }
+
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+  "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"];
+
+/** 12 as "twelve"; numbers past twenty stay as digits. */
+export function numberWord(n: number): string {
+  return NUMBER_WORDS[n] ?? String(n);
+}
+
+/**
+ * Fill {name} placeholders with number words. A word that starts the text
+ * gets a capital letter.
+ */
+export function fillCounts(text: string, counts: Record<string, number>): string {
+  return text.replace(/\{(\w+)\}/g, (match, key: string, offset: number) => {
+    const n = counts[key];
+    if (n === undefined) return match;
+    const word = numberWord(n);
+    return offset === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+  });
+}

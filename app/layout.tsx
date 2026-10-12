@@ -1,29 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Archivo, JetBrains_Mono } from "next/font/google";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { content } from "@/lib/content";
 import { currentSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-// Display: Instrument Serif, a condensed editorial serif with a lovely italic.
-const display = Instrument_Serif({
+// Archivo, from Omnibus-Type: a grotesque with a width axis, so headlines can
+// run wide and black like a poster while body text stays plain.
+const archivo = Archivo({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  variable: "--font-display",
+  axes: ["wdth"],
+  variable: "--font-archivo",
   display: "swap",
 });
 
-// Body: Geist, a calm grotesque that stays legible at small sizes.
-const body = Geist({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-// Code, file paths and numbers: Geist Mono.
-const code = Geist_Mono({
+// Code, file paths and numbers.
+const code = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-code",
   display: "swap",
@@ -40,14 +33,14 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f6f4ee" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d0d10" },
+    { media: "(prefers-color-scheme: light)", color: "#f2efe6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0e0d" },
   ],
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${code.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${code.variable}`}>
       <body>
         <a className="skip-link" href="#main">
           {content.skipLink}

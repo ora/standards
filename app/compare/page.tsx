@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { StatusBadge } from "@/components/status-badge";
-import { pairs } from "@/lib/content";
+import { numberWord, pairs } from "@/lib/content";
 import { getStandards, jobs, standardsForJob } from "@/lib/standards";
 import "./compare.css";
 
@@ -17,8 +17,8 @@ export default function ComparePage() {
   return (
     <div className="wrap compare">
       <header className="page-intro">
-        <p className="eyebrow">Side by side</p>
-        <h1 className="page-title">All {standards.length} on one screen</h1>
+        <p className="kicker">Side by side</p>
+        <h1 className="page-title">All {numberWord(standards.length)} on one screen</h1>
         <p className="lede">Grouped by the job each one does for an AI agent. Pick a name for the full story.</p>
       </header>
 
@@ -34,16 +34,17 @@ export default function ComparePage() {
             </tr>
           </thead>
           {jobs.map((job) => (
-            <tbody key={job.id} data-job={job.id}>
+            <tbody key={job.id}>
               <tr className="compare-table__group">
                 <th scope="colgroup" colSpan={5}>
-                  <span className="job-chip">
-                    {job.number} · {job.name}
+                  <span className="bar">
+                    <span className="bar__number">0{job.number}</span>
+                    {job.name}
                   </span>
                 </th>
               </tr>
               {standardsForJob(job.id, standards).map((s) => (
-                <tr key={s.id} data-job={s.job}>
+                <tr key={s.id} data-status={s.status}>
                   <th scope="row" data-label="Standard">
                     <Link href={`/standards/${s.id}`} className="compare-table__name">
                       {s.name}
@@ -79,12 +80,17 @@ export default function ComparePage() {
             <li key={pair.id} className="pair">
               <h3 className="pair__title">{pair.title}</h3>
               <p className="pair__summary">{pair.summary}</p>
-              <ul className={`pair__sides pair__sides--${pair.sides.length}`}>
-                {pair.sides.map((side) => {
+              <ul className="pair__sides">
+                {pair.sides.map((side, index) => {
                   const s = byId.get(side.id);
                   if (!s) return null;
                   return (
-                    <li key={side.id} data-job={s.job} className="pair__side">
+                    <li key={side.id} className="pair__side" data-status={s.status}>
+                      {index > 0 && (
+                        <span className="pair__vs" aria-hidden="true">
+                          vs
+                        </span>
+                      )}
                       <Link href={`/standards/${s.id}`} className="pair__name">
                         {s.name}
                       </Link>

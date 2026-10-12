@@ -7,13 +7,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="wrap site-header__bar">
         <Link href="/" className="wordmark" aria-label={content.homeLinkLabel}>
-          <span className="wordmark__mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-          </span>
+          <span className="wordmark__mark" aria-hidden="true" />
           <span aria-hidden="true">{content.siteName}</span>
         </Link>
         <MainNav />

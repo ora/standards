@@ -16,18 +16,17 @@ export default function WhichPage() {
   return (
     <div className="wrap which">
       <header className="page-intro">
-        <p className="eyebrow">The cheat sheet</p>
+        <p className="kicker">The cheat sheet</p>
         <h1 className="page-title">{guide.heading}</h1>
         <p className="lede">{guide.lede}</p>
       </header>
 
       <ol className="which__list">
         {guide.items.map((item, index) => {
-          const first = byId.get(item.standards[0] ?? "");
           return (
-            <li key={item.situation} className="which__item" data-job={first?.job}>
+            <li key={item.situation} className="which__item">
               <span className="which__number" aria-hidden="true">
-                {String(index + 1).padStart(2, "0")}
+                {index + 1}
               </span>
               <div className="which__situation">
                 <p>{item.situation}</p>
@@ -42,7 +41,7 @@ export default function WhichPage() {
                   if (!s) return null;
                   return (
                     <li key={id}>
-                      <Link href={`/standards/${s.id}`} className="which__answer" data-job={s.job}>
+                      <Link href={`/standards/${s.id}`} className="which__answer" data-status={s.status}>
                         <span className="which__answer-name">{s.name}</span>
                         <StatusBadge status={s.status} />
                       </Link>

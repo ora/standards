@@ -45,31 +45,25 @@ export default async function StandardPage({ params }: Props) {
   const file = `content/standards/${standard.id}.md`;
 
   return (
-    <article className="standard" data-job={standard.job}>
-      <div className="standard__glow" aria-hidden="true" />
+    <article className="standard">
       <div className="wrap">
         <nav className="crumbs" aria-label="Breadcrumb">
           <Link href="/#map">Map</Link>
           <span aria-hidden="true">/</span>
-          <span className="job-chip">
-            {job.number} · {job.name}
+          <span>
+            0{job.number} {job.name}
           </span>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{String(standard.number).padStart(2, "0")}</span>
         </nav>
 
-        <header className="standard__head">
-          <div className="element" aria-hidden="true">
-            <span className="element__number">{String(standard.number).padStart(2, "0")}</span>
-            <span className="element__symbol">{standard.name}</span>
-            <span className="element__job">{job.name}</span>
-          </div>
-          <div className="standard__titles">
-            <h1 className="standard__name">{standard.name}</h1>
-            {standard.full_name && <p className="standard__full">{standard.full_name}</p>}
-            <p className="standard__analogy">{standard.analogy}</p>
-            <div className="standard__status">
-              <StatusBadge status={standard.status} variant="pill" />
-              <span className="standard__status-note">{standard.status_note}</span>
-            </div>
+        <header className="standard__head" data-status={standard.status}>
+          <h1 className="standard__name">{standard.name}</h1>
+          {standard.full_name && <p className="standard__full">{standard.full_name}</p>}
+          <p className="standard__analogy">{standard.analogy}</p>
+          <div className="standard__status">
+            <StatusBadge status={standard.status} variant="pill" />
+            <span className="standard__status-note">{standard.status_note}</span>
           </div>
         </header>
 
@@ -77,31 +71,31 @@ export default async function StandardPage({ params }: Props) {
           <aside className="facts" aria-label="At a glance">
             <dl>
               <div>
-                <dt>Job in one phrase</dt>
+                <dt>Job</dt>
                 <dd>{standard.phrase}</dd>
               </div>
               <div>
-                <dt>When to use it</dt>
+                <dt>Use it when</dt>
                 <dd>{standard.when_to_use}</dd>
               </div>
               <div>
-                <dt>Who&apos;s behind it</dt>
+                <dt>Behind it</dt>
                 <dd>{standard.backers}</dd>
               </div>
               <div>
-                <dt>What an agent meets</dt>
+                <dt>Agents meet</dt>
                 <dd>
                   <code>{standard.looks_like}</code>
                 </dd>
               </div>
               <div>
-                <dt>Primary sources</dt>
+                <dt>Sources</dt>
                 <dd>
                   <ul className="facts__links">
                     {standard.links.map((link) => (
                       <li key={link.url}>
                         <a href={link.url} rel="noopener">
-                          {link.label} <span className="arrow" aria-hidden="true">↗</span>
+                          {link.label} ↗
                         </a>
                       </li>
                     ))}
@@ -112,7 +106,7 @@ export default async function StandardPage({ params }: Props) {
           </aside>
 
           <div className="standard__main">
-            <section className={`reality reality--${standard.status}`} aria-labelledby="reality-title">
+            <section className="reality" data-status={standard.status} aria-labelledby="reality-title">
               <h2 id="reality-title" className="reality__title">
                 Reality check
               </h2>
@@ -124,12 +118,13 @@ export default async function StandardPage({ params }: Props) {
             <footer className="verified">
               <p>
                 {stale && <strong className="verified__stale">May be out of date. </strong>}
-                Last checked against its sources on <time dateTime={standard.last_verified}>{formatDate(standard.last_verified)}</time>.
-                {" "}These standards move fast; if something changed, please help.
+                Last checked against its sources on{" "}
+                <time dateTime={standard.last_verified}>{formatDate(standard.last_verified)}</time>. These standards
+                move fast; if something changed, please help.
               </p>
               <p className="verified__actions">
                 <a href={editHref(file)} className="button">
-                  Edit this page on GitHub
+                  Edit on GitHub
                 </a>
                 <ReportErrorLink label="Report an error" />
               </p>
@@ -139,7 +134,7 @@ export default async function StandardPage({ params }: Props) {
 
         {related.length > 0 && (
           <section className="related" aria-labelledby="related-title">
-            <h2 id="related-title" className="related__title">
+            <h2 id="related-title" className="bar related__bar">
               Often mixed up with, or used next to
             </h2>
             <ul className="related__list">
@@ -155,27 +150,21 @@ export default async function StandardPage({ params }: Props) {
 
         <nav className="pager" aria-label="Previous and next standard">
           {previous ? (
-            <Link href={`/standards/${previous.id}`} className="pager__link" data-job={previous.job}>
-              <span className="pager__label">
-                <span className="arrow" aria-hidden="true">←</span> Previous
-              </span>
+            <Link href={`/standards/${previous.id}`} className="pager__link">
+              <span className="pager__label">← Previous</span>
               <span className="pager__name">{previous.name}</span>
             </Link>
           ) : (
             <span />
           )}
           {next ? (
-            <Link href={`/standards/${next.id}`} className="pager__link pager__link--next" data-job={next.job}>
-              <span className="pager__label">
-                Next <span className="arrow" aria-hidden="true">→</span>
-              </span>
+            <Link href={`/standards/${next.id}`} className="pager__link pager__link--next">
+              <span className="pager__label">Next →</span>
               <span className="pager__name">{next.name}</span>
             </Link>
           ) : (
             <Link href="/compare" className="pager__link pager__link--next">
-              <span className="pager__label">
-                Next <span className="arrow" aria-hidden="true">→</span>
-              </span>
+              <span className="pager__label">Next →</span>
               <span className="pager__name">Compare all</span>
             </Link>
           )}

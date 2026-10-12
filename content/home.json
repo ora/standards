@@ -1,11 +1,20 @@
 {
-  "eyebrow": "An open field guide",
-  "heading": "The agentic web, standard by standard",
+  "kicker": "An open field guide to the agentic web",
+  "headline": [
+    {
+      "text": "{standards} standards."
+    },
+    {
+      "text": "{jobs} jobs."
+    },
+    {
+      "text": "Only {production} carry real traffic.",
+      "highlight": true
+    }
+  ],
   "lede": "Agents are the new browsers. Since mid-2025, a dozen open standards have appeared to teach websites how to deal with them. They're young, they overlap, and the press releases make all of them sound finished. Here is what each one does, who's behind it, and how real it is today.",
   "mapHeading": "The map",
   "mapLede": "Read it left to right as an agent's visit: find what's offered, use the site, prove who it is, shop, then pay.",
-  "filterLabel": "Show",
-  "filterAll": "All",
   "patternsHeading": "What's real, what's hype",
   "patterns": [
     {
@@ -24,9 +33,22 @@
   "next": {
     "heading": "Where to next",
     "items": [
-      { "title": "Compare them side by side", "body": "All twelve on one screen, plus the pairs people mix up.", "href": "/compare" },
-      { "title": "Find the one you need", "body": "Start from what you're building, not from the acronym.", "href": "/which" },
-      { "title": "Fix or add a standard", "body": "Every page is a file. Open a pull request.", "href": "/contribute" }
+      {
+        "title": "Compare them side by side",
+        "body": "All twelve on one screen, plus the pairs people mix up.",
+        "href": "/compare"
+      },
+      {
+        "title": "Find the one you need",
+        "body": "Start from what you're building, not from the acronym.",
+        "href": "/which"
+      },
+      {
+        "title": "Fix or add a standard",
+        "body": "Every page is a file. Open a pull request.",
+        "href": "/contribute"
+      }
     ]
-  }
+  },
+  "legendLabel": "Key"
 }
