@@ -1,18 +1,11 @@
 {
   "kicker": "An open field guide to the agentic web",
   "title": [
-    "The Agentic-Web",
-    "Cheatsheet"
-  ],
-  "summary": [
     {
-      "text": "{standards} standards."
+      "text": "The Agentic-Web"
     },
     {
-      "text": "{jobs} jobs."
-    },
-    {
-      "text": "Only {production} carry real traffic.",
+      "text": "Cheatsheet",
       "highlight": true
     }
   ],

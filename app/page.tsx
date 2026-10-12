@@ -1,18 +1,13 @@
 import Link from "next/link";
 import { MapBoard } from "@/components/map-board";
-import { content, fillCounts, formatDate, homeContent } from "@/lib/content";
+import { content, formatDate, homeContent } from "@/lib/content";
 import { STATUS_IDS } from "@/lib/schema";
-import { getStandards, jobs, latestVerified } from "@/lib/standards";
+import { getStandards, latestVerified } from "@/lib/standards";
 import "./home.css";
 
 export default function HomePage() {
   const standards = getStandards();
   const home = homeContent;
-  const counts = {
-    standards: standards.length,
-    jobs: jobs.length,
-    production: standards.filter((s) => s.status === "production").length,
-  };
 
   return (
     <div className="home">
@@ -23,18 +18,11 @@ export default function HomePage() {
         </p>
         <h1 id="hero-title" className="hero__title">
           {home.title.map((line) => (
-            <span key={line} className="hero__line">
-              {line}
+            <span key={line.text} className="hero__line">
+              {line.highlight ? <mark>{line.text}</mark> : line.text}
             </span>
           ))}
         </h1>
-        <p className="hero__summary">
-          {home.summary.map((line) => (
-            <span key={line.text}>
-              {line.highlight ? <mark>{fillCounts(line.text, counts)}</mark> : fillCounts(line.text, counts)}{" "}
-            </span>
-          ))}
-        </p>
         <div className="hero__foot">
           <p className="lede">{home.lede}</p>
           <div className="hero__actions">
