@@ -3,15 +3,15 @@ name: Poppy
 full_name: Personal Agent Protocol (PAP)
 job: identity
 order: 2
-status: draft
-status_note: Draft 0.1 (Oct 9, 2026); no known deployments
+status: early
+status_note: Draft 0.1 (Oct 9, 2026); one known public deployment
 tagline: acts as you
 phrase: Your agent signs in to a company as you
 analogy: A valet key for your personal agent.
 looks_like: /.well-known/poppy.json
 when_to_use: When customers' own agents should sign in and act on their accounts. Track it; it's a fresh draft.
 backers: Sierra + Meta; 6 launch and 35 design partners
-reality_check: A draft first published October 9, 2026. Impressive partners, but no company is publicly known to serve a working `poppy.json` yet.
+reality_check: A draft first published October 9, 2026. Impressive partners, but only one company is publicly known to serve a working `poppy.json`, [Salespeak](https://salespeak.ai/.well-known/poppy.json), and none of the launch partners does yet.
 links:
   - label: Specification (Draft 0.1)
     url: https://personalagentprotocol.org/docs/spec
