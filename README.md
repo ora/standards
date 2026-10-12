@@ -1,6 +1,6 @@
-# Agentic Web Standards
+# ax.guide
 
-An open, plain-language field guide to the standards that let AI agents **find**, **act on**, **sign in to**, **shop on** and **pay** websites. For each one: what it does, who's behind it, and how real it is today.
+**The Agentic-Web Cheatsheet**, live at [ax.guide](https://ax.guide): an open, plain-language field guide to the standards that let AI agents **find**, **act on**, **sign in to**, **shop on** and **pay** websites. For each one: what it does, who's behind it, and how real it is today.
 
 Every standard is one Markdown file in [`content/standards/`](content/standards/). Fix a sentence or add a standard with a pull request; the site rebuilds from the files.
 
@@ -11,7 +11,7 @@ Every standard is one Markdown file in [`content/standards/`](content/standards/
 | `/` | The map: every standard as a tile, grouped by the five jobs of an agent's visit, with a status filter |
 | `/standards/<id>` | One standard: the picture, a reality check, how it works, who's behind it, sources, related standards |
 | `/compare` | All of them side by side, plus the pairs people mix up |
-| `/which` | The cheat sheet: start from what you're building |
+| `/which` | Which one do I need? Start from what you're building |
 | `/contribute` | How to edit, how status is decided, house style |
 
 ## Where things live
@@ -22,7 +22,7 @@ content/
   standards/_template.md   copy this to add one
   jobs.json           the five jobs, in map order
   pairs.json          the pairs people mix up (/compare)
-  guide.json          the cheat sheet (/which)
+  guide.json          "which one do I need?" (/which)
   home.json           home page text
   site.json           site shell: name, nav, footer, status labels
   contribute.md       the /contribute page
@@ -55,7 +55,7 @@ npm run dev        # http://localhost:3000
 
 ## Deploy
 
-The site is a standard Next.js app and deploys to Vercel with no settings: import the repository, keep the defaults, and every pull request gets its own preview. Canonical links and share images use, in order: the preview's branch address, `NEXT_PUBLIC_SITE_URL` if you set one, then Vercel's production address.
+The site is a standard Next.js app and deploys to Vercel with no settings: import the repository, keep the defaults, and every pull request gets its own preview. Canonical links and share images use, in order: the preview's branch address, `NEXT_PUBLIC_SITE_URL` (set to `https://ax.guide` in production), then Vercel's production address.
 
 ## Contributing
 

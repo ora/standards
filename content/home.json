@@ -1,6 +1,10 @@
 {
   "kicker": "An open field guide to the agentic web",
-  "headline": [
+  "title": [
+    "The Agentic-Web",
+    "Cheatsheet"
+  ],
+  "summary": [
     {
       "text": "{standards} standards."
     },

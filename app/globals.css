@@ -1,5 +1,5 @@
 /*
- * Agentic Web Standards: design foundation.
+ * ax.guide: design foundation.
  *
  * A poster. Black ink on warm paper, one heavy grotesque (Archivo) and a
  * mono for code. One loud accent, signal orange, and it means one thing:
@@ -250,7 +250,6 @@ main {
   font-stretch: 112%;
   letter-spacing: -0.01em;
   text-decoration: none;
-  text-transform: uppercase;
 }
 
 .wordmark__mark {
@@ -318,9 +317,8 @@ main {
   font-size: clamp(2.25rem, 1rem + 5vw, 5rem);
   font-weight: 900;
   font-stretch: 112%;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.04em;
   line-height: 0.9;
-  text-transform: uppercase;
 }
 
 .site-footer__cols {

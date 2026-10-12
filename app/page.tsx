@@ -22,12 +22,19 @@ export default function HomePage() {
           <span>Status as of {formatDate(latestVerified(standards))}</span>
         </p>
         <h1 id="hero-title" className="hero__title">
-          {home.headline.map((line) => (
-            <span key={line.text} className="hero__line">
-              {line.highlight ? <mark>{fillCounts(line.text, counts)}</mark> : fillCounts(line.text, counts)}
+          {home.title.map((line) => (
+            <span key={line} className="hero__line">
+              {line}
             </span>
           ))}
         </h1>
+        <p className="hero__summary">
+          {home.summary.map((line) => (
+            <span key={line.text}>
+              {line.highlight ? <mark>{fillCounts(line.text, counts)}</mark> : fillCounts(line.text, counts)}{" "}
+            </span>
+          ))}
+        </p>
         <div className="hero__foot">
           <p className="lede">{home.lede}</p>
           <div className="hero__actions">

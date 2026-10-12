@@ -16,7 +16,7 @@ export default function WhichPage() {
   return (
     <div className="wrap which">
       <header className="page-intro">
-        <p className="kicker">The cheat sheet</p>
+        <p className="kicker">Start here</p>
         <h1 className="page-title">{guide.heading}</h1>
         <p className="lede">{guide.lede}</p>
       </header>

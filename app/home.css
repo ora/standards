@@ -41,12 +41,21 @@
   display: block;
 }
 
-.hero__line mark {
-  padding: 0.02em 0.1em 0 0.06em;
-  margin-inline-start: -0.06em;
+/* The counts under the title: the guide's main point, with the real part in the accent. */
+.hero__summary {
+  max-width: 30ch;
+  font-size: clamp(1.5rem, 0.8rem + 2.8vw, 3.25rem);
+  font-weight: 900;
+  font-stretch: 100%;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.hero__summary mark {
+  padding: 0.02em 0.12em 0 0.06em;
   background-color: var(--accent);
   color: var(--on-accent);
-  line-height: 1.02;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
