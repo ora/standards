@@ -11,7 +11,7 @@
   ],
   "lede": "Agents are the new browsers. Since mid-2025, a dozen open standards have appeared to teach websites how to deal with them. They're young, they overlap, and the press releases make all of them sound finished. Here is what each one does, who's behind it, and how real it is today.",
   "mapHeading": "The map",
-  "mapLede": "Read it left to right as an agent's visit: find what's offered, use the site, prove who it is, shop, then pay.",
+  "mapLede": "Read it left to right, in the order an agent visits a site.",
   "patternsHeading": "What's real, what's hype",
   "patterns": [
     {
