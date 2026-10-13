@@ -73,21 +73,50 @@
 
 /* The map */
 
+/* Pulled up close to the hero so the columns start above the fold. */
 .home__map {
+  margin-block-start: calc(var(--space-12) - var(--space-24));
   scroll-margin-block-start: var(--space-8);
 }
 
 .map-head {
   display: grid;
-  gap: var(--space-4);
-  margin-block-end: var(--space-8);
+  gap: var(--space-3) var(--space-8);
+  margin-block-end: var(--space-6);
+}
+
+@media (min-width: 48rem) {
+  .map-head {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+  }
+
+  .map-head__note {
+    justify-self: end;
+    text-align: end;
+  }
+
+  .legend {
+    grid-column: 1 / -1;
+  }
+}
+
+.map-head__title {
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+}
+
+.map-head__note {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  color: var(--color-ink-muted);
 }
 
 .legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3) var(--space-8);
-  margin: var(--space-2) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   font-size: var(--text-sm);

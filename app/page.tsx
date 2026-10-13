@@ -38,10 +38,10 @@ export default function HomePage() {
 
       <section id="map" className="wrap home__map" aria-labelledby="map-title">
         <div className="map-head">
-          <h2 id="map-title" className="section-title">
+          <h2 id="map-title" className="section-title map-head__title">
             {home.mapHeading}
           </h2>
-          <p className="lede">{home.mapLede}</p>
+          <p className="map-head__note">{home.mapLede}</p>
           <ul className="legend" aria-label={home.legendLabel}>
             {STATUS_IDS.map((id) => (
               <li key={id} className="legend__item" data-status={id}>
