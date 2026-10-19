@@ -22,7 +22,7 @@ Agents are the new browsers. Since mid-2025 a dozen open standards have appeared
 
 Read it left to right as an agent's visit: find what's offered, use the site, prove who it is, shop, then pay. Orange means real traffic today, plain means early use, and hatched means a draft.
 
-<a href="https://ax.guide/#map"><img src=".github/assets/map.png" alt="The map: twelve standards in five columns (Find, Act, Identity, Shop, Pay). Web Bot Auth, UCP, ACP and x402 are orange for real traffic; Poppy is hatched as a draft; the rest are early use." width="100%"></a>
+<a href="https://ax.guide/#map"><img src=".github/assets/map.png" alt="The map: twelve standards in five columns (Find, Act, Identity, Shop, Pay). Web Bot Auth, UCP, ACP and x402 are orange for real traffic; the rest are early use." width="100%"></a>
 
 ## The standards
 
