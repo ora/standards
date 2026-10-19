@@ -12,11 +12,13 @@ when_to_use: When you have lots of structured content and want people and agents
 backers: Microsoft (R.V. Guha)
 reality_check: Early. Nobody publishes a deployment count, partly because NLWeb has no fixed address to crawl.
 links:
+  - label: Specification (v0.55)
+    url: https://nlweb.ai/docs/specification
   - label: Source code
     url: https://github.com/nlweb-ai/NLWeb
   - label: Microsoft's announcement
     url: https://news.microsoft.com/source/features/company-news/introducing-nlweb-bringing-conversational-interfaces-directly-to-the-web/
-  - label: Cloudflare one-click setup
+  - label: Cloudflare setup
     url: https://developers.cloudflare.com/ai-search/how-to/nlweb
   - label: W3C community group
     url: https://www.w3.org/community/nlweb
@@ -25,14 +27,14 @@ related:
     note: WebMCP works inside the browser page. NLWeb is an endpoint on your server.
   - id: ai-catalog
     note: An AI catalog (or ARD file) can list your NLWeb endpoint.
-last_verified: "2026-10-11"
+last_verified: "2026-10-19"
 ---
 
 ## How it works
 
 Most websites already describe their content in structured ways (Schema.org tags, RSS feeds), yet you can still only search them with keywords. NLWeb indexes that structured data and adds an "ask" endpoint: type "vegetarian recipes under 30 minutes without nuts" and get answers drawn only from that site.
 
-Every NLWeb site is also an MCP server, so AI agents can ask the same questions through a standard plug. [Cloudflare offers a one-click "NLWeb Website" option](https://developers.cloudflare.com/ai-search/how-to/nlweb) that crawls your site and sets up an `/ask` page for people and an `/mcp` endpoint for agents.
+Every NLWeb site is also an MCP server, so AI agents can ask the same questions through a standard plug. [Cloudflare offers an "NLWeb Website" option](https://developers.cloudflare.com/ai-search/how-to/nlweb), in public preview, that crawls your site and sets up an `/ask` page for people and an `/mcp` endpoint for agents.
 
 ## Who's behind it
 

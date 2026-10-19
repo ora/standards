@@ -10,7 +10,7 @@ phrase: Products (and checkout) into ChatGPT
 analogy: A catalogue mailed straight to your personal shopper, with an optional order form attached.
 looks_like: Product feeds + checkout endpoints
 when_to_use: When you want your products shown in ChatGPT, especially if you already use Stripe.
-backers: OpenAI + Stripe
+backers: OpenAI + Stripe, with Meta on the steering committee
 reality_check: In production for discovery. The headline feature that launched ACP, buying inside ChatGPT, is exactly the part that was scaled back.
 links:
   - label: Specification (GitHub)
@@ -24,7 +24,7 @@ related:
     note: A payment layer that can sit underneath.
   - id: x402
     note: Payment rails like MPP and x402 can sit underneath.
-last_verified: "2026-10-11"
+last_verified: "2026-10-19"
 ---
 
 ## How it works
@@ -35,6 +35,6 @@ Today its main job is discovery: merchants push feeds and promotions so ChatGPT 
 
 ## Who's behind it
 
-OpenAI and Stripe launched it on September 29, 2025, alongside "Instant Checkout" in ChatGPT. [The spec is still labeled beta](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol); its latest stable version is dated April 17, 2026.
+OpenAI and Stripe launched it on September 29, 2025, alongside "Instant Checkout" in ChatGPT. [The spec is still labeled beta](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol); its latest stable version is dated April 17, 2026. [Meta joined its steering committee](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/blob/main/docs/governance.md) on April 24, 2026; OpenAI and Stripe remain the founding maintainers.
 
 On March 24, 2026 OpenAI said it was [expanding ACP to support product discovery](https://openai.com/index/powering-product-discovery-in-chatgpt/), naming Target, Sephora, Nordstrom, Lowe's, Best Buy, The Home Depot and Wayfair as integrated, while checkout moved back to the merchant's side.

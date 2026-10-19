@@ -11,9 +11,11 @@ analogy: A universal power socket for shopping. Any assistant plugs into any sto
 looks_like: /.well-known/ucp
 when_to_use: When you sell goods and want any AI assistant to browse, cart and check out.
 backers: Google + Shopify, with governing and tech councils
-reality_check: In production, and the most real of the twelve. An independent checker counts more than 15,000 verified storefronts, mostly through Shopify. One catch, the August release made 17 breaking changes, so "supports UCP" doesn't tell you which version.
+reality_check: In production, and the most real of the twelve. According to an independent tracker, [UCP Checker](https://ucpchecker.com/blog/state-of-agentic-commerce-september-2026), about 17,800 stores had a working UCP profile on September 22, 2026, about 60% of them on Shopify and most of the rest on Wix. One catch is that the [August release](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25) lists 11 groups of breaking changes, and about four in ten stores still declare the April version, so "supports UCP" doesn't tell you which version.
 links:
-  - label: ucp.dev
+  - label: Specification (ucp.dev)
+    url: https://ucp.dev/
+  - label: Announcements
     url: https://ucp.dev/documentation/announcements/
   - label: Release v2026-08-25
     url: https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25
@@ -24,7 +26,7 @@ related:
     note: AP2 plugs in for payment consent; UCP's latest release has an AP2 extension.
   - id: poppy
     note: May overlap with UCP on sign-in.
-last_verified: "2026-10-11"
+last_verified: "2026-10-19"
 ---
 
 ## How it works
@@ -35,6 +37,6 @@ Ask Google's AI Mode for waterproof hiking boots under $150, and it compares sev
 
 ## Who's behind it
 
-[Google launched it with Shopify](https://ucp.dev/documentation/announcements/) on January 11, 2026, co-developed with Etsy, Wayfair, Target and Walmart. A Governing Council has Google and Shopify as permanent members, and Stripe joined on April 28; a technical council added Amazon, Meta, Microsoft, Salesforce and Stripe in April, and industry councils for food, lodging and payments followed over the summer. A council seat isn't a storefront: Amazon being at the table doesn't mean Amazon sells through UCP.
+[Google launched it with Shopify](https://blog.google/products/ads-commerce/agentic-commerce-ai-tools-protocol-retailers-platforms/) on January 11, 2026, co-developed with Etsy, Wayfair, Target and Walmart. A Governing Council has Google and Shopify as permanent members, and Stripe joined on April 28; a technical council added Amazon, Meta, Microsoft, Salesforce and Stripe in April, and [industry councils](https://ucp.dev/documentation/announcements/) for food, lodging and payments followed between July and September. A council seat isn't a storefront: Amazon being at the table doesn't mean Amazon sells through UCP.
 
-The current release, [v2026-08-25](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25), added support for more industries and stronger card security.
+The current release, [v2026-08-25](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25), reorganized the spec so it can grow beyond shopping into food and lodging. It also added grocery features and an extra card check, called 3DS2, where the card's bank confirms the buyer. A first draft for hotel booking followed on September 25, 2026.

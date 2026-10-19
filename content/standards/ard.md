@@ -11,18 +11,18 @@ analogy: A search engine for agent tools.
 looks_like: /.well-known/ard.json
 when_to_use: When you offer APIs, MCP servers or agents and want agent search registries to find them.
 backers: Google-led authors (Google, Hugging Face, R.V. Guha)
-reality_check: Early. [Hugging Face runs a public registry](https://huggingface.co/blog/agentic-resource-discovery-launch), but one independent check in June found that none of the named contributor companies served a catalog yet.
+reality_check: Early. [Hugging Face runs a public registry](https://huggingface.co/blog/agentic-resource-discovery-launch), and Hugging Face and GitHub now publish catalogs, though GitHub's is only at the older `ai-catalog.json` address. According to [an independent sweep in September 2026](https://github.com/Agent-Card/ai-catalog/issues/115), only 24 of 102 publishers could be found at `ard.json`; the other 78 used only `ai-catalog.json`.
 links:
   - label: Specification (v0.91)
     url: https://agenticresourcediscovery.org/spec/
   - label: Google's announcement
     url: https://developers.googleblog.com/announcing-the-agentic-resource-discovery-specification/
-  - label: Hugging Face registry
+  - label: Hugging Face registry launch
     url: https://huggingface.co/blog/agentic-resource-discovery-launch
 related:
   - id: ai-catalog
     note: Its predecessor, now the publishing format. ARD is the discovery format. Serve the same file at both addresses.
-last_verified: "2026-10-11"
+last_verified: "2026-10-19"
 ---
 
 ## How it works
@@ -33,6 +33,6 @@ Separate "registries" collect these files and answer plain-language searches. Sa
 
 ## Who's behind it
 
-[Google announced ARD](https://developers.googleblog.com/announcing-the-agentic-resource-discovery-specification/) on June 17, 2026. The [current version is v0.91](https://agenticresourcediscovery.org/spec/), a "Proposal" dated August 26, 2026, from authors at Google and Hugging Face plus R.V. Guha (the creator of RSS and Schema.org).
+[Google announced ARD](https://developers.googleblog.com/announcing-the-agentic-resource-discovery-specification/) on June 17, 2026. The [current version is v0.91](https://agenticresourcediscovery.org/spec/), a "Proposal" dated August 26, 2026, from authors at Google and Hugging Face plus R.V. Guha (who helped create RSS and Schema.org).
 
-It tells agents to look for `ard.json` first and treats the older `ai-catalog.json` address as its predecessor. On July 9, 2026 the two formally split into a *publishing* format (ai-catalog) and a *discovery* format (ARD). The file name changed within a few months, so early tutorials already show the old address.
+It tells agents to look for `ard.json` first and treats the older `ai-catalog.json` address as its predecessor. At a meeting on July 9, 2026 the two groups agreed to keep them [loosely linked, at least for now](https://github.com/ards-project/ard-spec/blob/main/adr/0010-ard-and-ai-catalog-loose-coupling.md): ai-catalog is the *publishing* format and ARD is the *discovery* format. The ARD project recorded this as a formal decision on October 11, 2026. The file name changed within a few months, so early tutorials already show the old address.

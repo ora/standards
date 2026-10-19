@@ -22,8 +22,8 @@ related:
   - id: auth-md
     note: auth.md signs up a new user for the agent; Web Bot Auth only proves which bot is asking.
   - id: x402
-    note: Cloudflare pairs them for pay-per-crawl.
-last_verified: "2026-10-11"
+    note: Cloudflare plans to use them together for pay-per-crawl.
+last_verified: "2026-10-19"
 ---
 
 ## How it works
@@ -38,4 +38,4 @@ It answers *which agent* is visiting, not *whom it represents*; that's Poppy's a
 
 Cloudflare proposed it in May 2025. On September 1, 2026 the IETF's webbotauth working group [adopted it as an official working-group draft](https://datatracker.ietf.org/doc/draft-ietf-webbotauth-httpsig-protocol/), written by authors from Cloudflare and Google; it's the group's only adopted document. It's still a draft, not an RFC: adoption isn't approval.
 
-[Visa's Trusted Agent Protocol and Mastercard's Agent Pay build on it](https://blog.cloudflare.com/secure-agentic-commerce/), adding a tag that says whether the agent is browsing or buying, and observers report OpenAI, Cloudflare and DuckDuckGo signing requests today. The next revision is expected to change how the key directory is referenced, so early implementations may need updates.
+[Visa's Trusted Agent Protocol and Mastercard's Agent Pay build on it](https://blog.cloudflare.com/secure-agentic-commerce/), adding a tag that says whether the agent is browsing or buying, and observers report OpenAI, Cloudflare and DuckDuckGo signing requests today. The working-group draft has already changed how a request points to its key directory, but [Cloudflare's own checker](https://developers.cloudflare.com/bots/reference/bot-verification/web-bot-auth/) still expects the older format (as of October 8, 2026), so early implementations may need updates.
