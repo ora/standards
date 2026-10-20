@@ -35,12 +35,17 @@
  *       live state, both IETF revisions, a page's text, a JSON document), so
  *       the agent that drafts a fix needs no network. Exits 1 when no drifted
  *       spec has that title.
- *   node scripts/spec-drift.mjs vet-patch <patch> --allow <regex> [--pins-only <regex>] [--plain <regex>]
- *       For the fix workflow: refuse a patch that touches a path outside
- *       --allow, adds a binary, symlink, rename or mode change, changes a
- *       --pins-only file anywhere but its `export const X = "..."` lines, or
- *       adds markup or code (`<`, `{`, `}`, import or export lines) to a
- *       --plain file, such as MDX that a site build would run.
+ *   node scripts/spec-drift.mjs vet-staged --allow <regex> [--pins-only <regex>] [--plain <regex>] [--json-pins <regex>]
+ *       For the fix workflow, after `git apply --index` of the agent's patch:
+ *       ask git what is staged and refuse anything but plain added or modified
+ *       files under --allow; in --pins-only files only `export const X = "..."`
+ *       lines may change; --plain files may gain no `<`, `{`, `}` or
+ *       import/export lines (MDX compiles those to code); in --json-pins files
+ *       only string `pin` values may differ.
+ *   node scripts/spec-drift.mjs pr-body <in.md> --out <out.md>
+ *       For the fix workflow: the agent's pull request text with HTML
+ *       comments removed, closing keywords and @mentions defused and length
+ *       capped. Exits 1 when it holds something shaped like a secret.
  *   node scripts/spec-drift.mjs health --failed <true|false> --run-url <url> --out <report.json>
  *       A one-entry report for the watcher's own health: `issues` then opens
  *       an issue when a run failed and closes it after the next good run.
@@ -96,7 +101,7 @@ const REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const SHA = /^[0-9a-f]{40}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 // A release tag that may appear in an issue: Git allows backticks and brackets in ref names, so the manifest's own `match` is not enough.
-const TAG = /^[A-Za-z0-9._+/-]{1,100}$/;
+const TAG = /^[A-Za-z0-9][A-Za-z0-9._+/-]{0,99}$/;
 // The path part of a redirect target shown in an issue ("served from /docs/0.2/spec").
 const SAFE_PATH = /^\/[A-Za-z0-9._~/-]{0,200}$/;
 const KINDS = ["git-path", "git-head", "git-dated-dirs", "git-latest-tag", "ietf-draft", "page", "json-field"];
@@ -276,6 +281,7 @@ function validateSource(src) {
 /** A pin written in the manifest, or read from a `CONSTANT = "value"` line in a source file. */
 export function resolvePin(pin, root = process.cwd()) {
   if (typeof pin === "string") return pin;
+  if (pin.file.startsWith("/") || pin.file.split(/[\\/]/).includes("..")) throw new Error(`${pin.file} is outside the repository`);
   const text = readFileSync(join(root, pin.file), "utf8");
   const m = new RegExp(`\\b${pin.constant}\\s*=\\s*"([^"]+)"`).exec(text);
   if (!m) throw new Error(`${pin.constant} not found in ${pin.file}`);
@@ -716,7 +722,7 @@ export function healthReport({ failed, runUrl }) {
           "",
           "## Objective",
           "",
-          "Open the run and see which job failed. Most often a watched source could not be read (a file or folder moved, a repository was renamed, a page changed its layout, or a site was down): fix the source in the manifest and run the watch again. A failed script comparison means this repo's `scripts/spec-drift.mjs` no longer matches ax.guide's copy. This issue closes on the next run that succeeds.",
+          "Open the run and see which job failed. Most often a watched source could not be read (a file or folder moved, a repository was renamed, a page changed its layout, or a site was down): fix the source in the manifest and run the watch again. If a job that compares this repo's `scripts/spec-drift.mjs` with ax.guide's copy failed, bring the two copies together. This issue closes on the next run that succeeds.",
           "",
           "---",
           "_Maintained by the spec drift watch (`scripts/spec-drift.mjs health`)._",
@@ -949,50 +955,120 @@ async function context(manifestPath, { titleFile, out }) {
 
 const PIN_LINE = /^export const [A-Z][A-Z0-9_]* = "[A-Za-z0-9._@:+/-]*";$/;
 
-/**
- * Problems with a unified diff (`git diff --binary` output) proposed by the
- * fix agent: every path must match `allow`; a path matching `pinsOnly` may
- * only change `export const NAME = "value";` lines; no binaries, symlinks,
- * renames, copies, mode changes or deleted files; a path matching `plain` may
- * gain no `<`, `{`, `}` or import/export lines (MDX compiles those to code
- * that a site build runs). Empty when the patch is fine.
- */
-export function vetPatch(patch, { allow, pinsOnly, plain }) {
-  const problems = [];
-  const files = [];
-  let current = null;
-  for (const line of patch.split("\n")) {
-    const header = /^diff --git a\/(\S+) b\/(\S+)$/.exec(line);
-    if (header) {
-      current = { a: header[1], b: header[2], lines: [] };
-      files.push(current);
-      continue;
+/** git, with nothing in the checkout able to make it run a command. */
+function safeGit(cwd, args) {
+  return run(
+    "git",
+    ["-c", "core.fsmonitor=false", "-c", "core.hooksPath=/dev/null", "-C", cwd, ...args],
+    { maxBuffer: 64 * 1024 * 1024 },
+  );
+}
+
+/** Added and removed lines of one staged file, read from git's own diff by its hunk counts. */
+function stagedLines(cwd, path) {
+  const out = safeGit(cwd, ["diff", "--cached", "-U0", "--no-color", "--no-ext-diff", "--no-textconv", "--", `:(literal)${path}`]);
+  const lines = out.split("\n");
+  const added = [];
+  const removed = [];
+  let i = lines.findIndex((l) => l.startsWith("@@ "));
+  while (i !== -1 && i < lines.length) {
+    const m = /^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@/.exec(lines[i]);
+    if (!m) break;
+    let minus = m[1] === undefined ? 1 : Number(m[1]);
+    let plus = m[2] === undefined ? 1 : Number(m[2]);
+    i++;
+    while ((minus > 0 || plus > 0) && i < lines.length) {
+      const l = lines[i++];
+      if (l.startsWith("\\")) continue;
+      if (minus > 0 && l.startsWith("-")) {
+        removed.push(l.slice(1));
+        minus--;
+      } else if (plus > 0 && l.startsWith("+")) {
+        added.push(l.slice(1));
+        plus--;
+      } else throw new Error(`${path}: unexpected line in git's diff`);
     }
-    if (!current) {
-      if (line.trim()) problems.push("the patch has text before its first file");
-      continue;
-    }
-    if (/^(old mode|new mode|deleted file mode|rename from|rename to|copy from|copy to|similarity index|GIT binary patch|Binary files)/.test(line)) {
-      problems.push(`${current.b}: ${line.split(" ").slice(0, 2).join(" ")} is not allowed`);
-    } else if (/^new file mode /.test(line) && !/^new file mode 100644$/.test(line)) {
-      problems.push(`${current.b}: only regular files may be added`);
-    } else if (/^[+-]/.test(line) && !/^(\+\+\+|---) /.test(line)) {
-      current.lines.push(line);
-    }
+    while (i < lines.length && lines[i].startsWith("\\")) i++;
+    if (i < lines.length && !lines[i].startsWith("@@ ")) break;
   }
-  if (files.length === 0) problems.push("the patch changes nothing");
-  for (const f of files) {
-    if (f.a !== f.b) problems.push(`${f.b}: renames are not allowed`);
-    if (!allow.test(f.b) || f.b.split("/").includes("..")) problems.push(`${f.b}: outside the paths the fix agent may change`);
-    else if (pinsOnly && pinsOnly.test(f.b)) {
-      for (const l of f.lines) if (!PIN_LINE.test(l.slice(1))) problems.push(`${f.b}: only pin constant lines may change here`);
-    } else if (plain && plain.test(f.b)) {
-      for (const l of f.lines) {
-        if (l.startsWith("+") && (/[<{}]/.test(l) || /^\+\s*(import|export)\b/.test(l))) problems.push(`${f.b}: added lines may not contain markup or code here`);
+  return { added, removed };
+}
+
+/** A JSON document with every string `pin` value blanked, so two versions compare equal when only pins moved. */
+function withoutPins(value) {
+  if (Array.isArray(value)) return value.map(withoutPins);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === "pin" && typeof v === "string" ? "" : withoutPins(v)]));
+  }
+  return value;
+}
+
+/**
+ * Problems with what is staged in `cwd` (the agent's patch after `git apply
+ * --index`), read from git itself rather than from the patch text: only
+ * regular files added or modified under `allow`; in `pinsOnly` files only
+ * `export const NAME = "value";` lines change; `plain` files gain no `<`,
+ * `{`, `}` or import/export lines; in `jsonPins` files only string `pin`
+ * values differ. Empty when the change is fine.
+ */
+export function vetStaged(cwd, { allow, pinsOnly, plain, jsonPins }) {
+  const problems = [];
+  const fields = safeGit(cwd, ["diff", "--cached", "--name-status", "--no-renames", "-z"]).split("\0").filter(Boolean);
+  if (fields.length === 0) return ["the agent changed nothing"];
+  const numstat = safeGit(cwd, ["diff", "--cached", "--numstat", "--no-renames", "-z"]).split("\0").filter(Boolean);
+  for (const row of numstat) if (row.startsWith("-\t-\t")) problems.push(`${row.slice(4)}: binary files are not allowed`);
+  for (let k = 0; k < fields.length; k += 2) {
+    const status = fields[k];
+    const path = fields[k + 1] ?? "";
+    if (status !== "M" && status !== "A") {
+      problems.push(`${path}: only added or modified files are allowed (git says ${status})`);
+      continue;
+    }
+    if (!allow.test(path) || path.split("/").includes("..")) {
+      problems.push(`${path}: outside the paths the fix agent may change`);
+      continue;
+    }
+    const mode = safeGit(cwd, ["ls-files", "-s", "-z", "--", `:(literal)${path}`]).split(" ")[0];
+    const before = status === "M" ? safeGit(cwd, ["ls-tree", "HEAD", "--", `:(literal)${path}`]).split(" ")[0] : "100644";
+    if (mode !== "100644" || before !== "100644") {
+      problems.push(`${path}: only regular files are allowed`);
+      continue;
+    }
+    if (pinsOnly && pinsOnly.test(path)) {
+      const { added, removed } = stagedLines(cwd, path);
+      if ([...added, ...removed].some((l) => !PIN_LINE.test(l))) problems.push(`${path}: only pin constant lines may change here`);
+    } else if (plain && plain.test(path)) {
+      const { added } = stagedLines(cwd, path);
+      if (added.some((l) => /[<{}]/.test(l) || /^\s*(import|export)\b/.test(l))) problems.push(`${path}: added lines may not contain markup or code here`);
+    } else if (jsonPins && jsonPins.test(path)) {
+      try {
+        const oldDoc = status === "M" ? JSON.parse(safeGit(cwd, ["show", `HEAD:${path}`])) : undefined;
+        const newDoc = JSON.parse(safeGit(cwd, ["show", `:${path}`]));
+        if (JSON.stringify(withoutPins(oldDoc)) !== JSON.stringify(withoutPins(newDoc))) problems.push(`${path}: only pin values may change here`);
+      } catch (error) {
+        // A document that no longer parses is a refusal, not a crash.
+        if (!(error instanceof SyntaxError)) throw error;
+        problems.push(`${path}: is not valid JSON`);
       }
     }
   }
   return [...new Set(problems)];
+}
+
+const SECRET = /\b(sk-ant-[A-Za-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})/;
+
+/**
+ * The fix agent's pull request text, made safe to post: no HTML comments
+ * (which hide text from the rendered view), no closing keywords or @mentions
+ * that act on their own (put in code spans), at most 20,000 characters.
+ * Throws on anything shaped like a secret.
+ */
+export function cleanPrBody(text) {
+  if (SECRET.test(text)) throw new Error("the description holds something shaped like a secret");
+  let body = text.replace(/<!--[\s\S]*?(-->|$)/g, "");
+  body = body.replace(/\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)(\s*:?\s+)((?:[\w.-]+\/[\w.-]+)?#\d+)/gi, "$1$2`$3`");
+  body = body.replace(/(^|[^`\w])@([A-Za-z0-9-]+(?:\/[A-Za-z0-9_.-]+)?)/g, "$1`@$2`");
+  return body.length > 20_000 ? `${body.slice(0, 20_000)}\n\n[cut at 20,000 characters]\n` : body;
 }
 
 // ---------------------------------------------------------------- cli
@@ -1025,21 +1101,19 @@ async function main(argv) {
       });
     case "context":
       return context(args[0], { titleFile: option(args, "--title-file"), out: option(args, "--out") });
-    case "vet-patch": {
-      const allow = option(args, "--allow");
-      const pinsOnly = option(args, "--pins-only");
+    case "vet-staged": {
+      const re = (name) => (option(args, name) ? new RegExp(option(args, name)) : undefined);
+      const allow = re("--allow");
       if (!allow) throw new Error("--allow <regex> is required");
-      const plain = option(args, "--plain");
-      const problems = vetPatch(readFileSync(args[0], "utf8"), {
-        allow: new RegExp(allow),
-        pinsOnly: pinsOnly ? new RegExp(pinsOnly) : undefined,
-        plain: plain ? new RegExp(plain) : undefined,
-      });
+      const problems = vetStaged(process.cwd(), { allow, pinsOnly: re("--pins-only"), plain: re("--plain"), jsonPins: re("--json-pins") });
       for (const p of problems) console.log(`- ${p}`);
       if (problems.length) process.exit(1);
-      console.log("the patch only touches allowed paths");
+      console.log("the staged change only touches allowed paths");
       return;
     }
+    case "pr-body":
+      writeFileSync(option(args, "--out") ?? "pr-body.md", cleanPrBody(readFileSync(args[0], "utf8")));
+      return;
     case "health": {
       const failed = option(args, "--failed");
       if (failed !== "true" && failed !== "false") throw new Error("--failed must be true or false");
@@ -1063,7 +1137,7 @@ async function main(argv) {
       return;
     }
     default:
-      console.error("usage: spec-drift.mjs check|issues|health|context|vet-patch|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
+      console.error("usage: spec-drift.mjs check|issues|health|context|vet-staged|pr-body|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
       process.exit(2);
   }
 }
