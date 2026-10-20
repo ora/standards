@@ -13,8 +13,9 @@ name: spec drift watch
 # spec-drift-fix.yml, which asks Claude to recheck the page and open a pull
 # request. A run that fails opens its own issue, closed by the next good run.
 #
-# The check itself is scripts/spec-drift.mjs, shared byte for byte with Ora's
-# watcher (eralabs-ai/ora). It needs no npm install. Upstream content never
+# The check itself is scripts/spec-drift.mjs, shared byte for byte with Ora
+# (eralabs-ai/ora) and poppy.ax (ora/poppy-ax), whose watchers compare their
+# copy with this one; change it here first. It needs no npm install. Upstream content never
 # reaches a shell: the script runs git and gh with argument arrays, and only
 # hashes, revision names and digests reach the issues.
 
@@ -94,13 +95,6 @@ jobs:
             --opened-out "$RUNNER_TEMP/opened.json" \
             --escalate-after 14 --escalate-label spec-drift-overdue --escalate-mention @liady
 
-      - name: Ask Claude to fix each newly opened issue
-        run: |
-          # Issue numbers come from the script, which only records digits.
-          for n in $(jq -r '.[].number' "$RUNNER_TEMP/opened.json"); do
-            gh workflow run spec-drift-fix.yml --repo "$GITHUB_REPOSITORY" -f issue="$n"
-          done
-
       - name: Publish the status for the site
         run: |
           git config user.name "github-actions[bot]"
@@ -120,6 +114,17 @@ jobs:
           git -C "$dir" commit --quiet -m "chore: update spec drift status"
           git -C "$dir" push origin "HEAD:refs/heads/$STATUS_BRANCH"
 
+      # After the status publish and allowed to fail: a refused dispatch must
+      # not cost the site its status. A fix run that never started can be
+      # retried by hand.
+      - name: Ask Claude to fix each newly opened issue
+        continue-on-error: true
+        run: |
+          # Issue numbers come from the script, which only records digits.
+          for n in $(jq -r '.[].number' "$RUNNER_TEMP/opened.json"); do
+            gh workflow run spec-drift-fix.yml --repo "$GITHUB_REPOSITORY" -f issue="$n"
+          done
+
       - name: Fail when a spec could not be read
         if: needs.check.outputs.outcome == 'failure'
         run: |
@@ -136,7 +141,8 @@ jobs:
       issues: write
     env:
       GH_TOKEN: ${{ github.token }}
-      FAILED: ${{ needs.check.result != 'success' || needs.check.outputs.outcome == 'failure' || needs.report.result != 'success' }}
+      # A cancelled run is not a failure.
+      FAILED: ${{ contains(needs.*.result, 'failure') || needs.check.outputs.outcome == 'failure' }}
     steps:
       - uses: actions/checkout@v4
         with:

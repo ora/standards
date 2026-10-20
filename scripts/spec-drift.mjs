@@ -10,9 +10,10 @@
  * its pin has DRIFTED: it changed since its last review. Moving a pin is the
  * record that someone reviewed the change.
  *
- * This file is shared, byte for byte, by ora/standards (ax.guide) and
- * eralabs-ai/ora (the Ora ranker). Ora's weekly watcher compares the two
- * copies, so change both together.
+ * This file is shared, byte for byte, by ora/standards (ax.guide),
+ * eralabs-ai/ora (the Ora ranker) and ora/poppy-ax (poppy.ax). Ora's and
+ * poppy.ax's weekly watchers compare their copy with ax.guide's, so change all
+ * three together, ax.guide first.
  *
  * Usage:
  *   node scripts/spec-drift.mjs check <manifest.json> [--only <id>] [--out <report.json>]
@@ -28,6 +29,16 @@
  *       opened, so the workflow can start the fix agent for each. An issue
  *       still open after --escalate-after days gets the escalate label and
  *       one comment.
+ *   node scripts/spec-drift.mjs context <manifest.json> --title-file <title.txt> --out <dir>
+ *       For the fix workflow: find the drifted spec whose issue has this title
+ *       and write what changed into <dir> (Git diffs between the pin and the
+ *       live state, both IETF revisions, a page's text, a JSON document), so
+ *       the agent that drafts a fix needs no network. Exits 1 when no drifted
+ *       spec has that title.
+ *   node scripts/spec-drift.mjs vet-patch <patch> --allow <regex> [--pins-only <regex>]
+ *       For the fix workflow: refuse a patch that touches a path outside
+ *       --allow, adds a binary, symlink, rename or mode change, or changes a
+ *       --pins-only file anywhere but its `export const X = "..."` lines.
  *   node scripts/spec-drift.mjs health --failed <true|false> --run-url <url> --out <report.json>
  *       A one-entry report for the watcher's own health: `issues` then opens
  *       an issue when a run failed and closes it after the next good run.
@@ -71,7 +82,7 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -387,6 +398,18 @@ class Live {
     return dir;
   }
 
+  /** A clone with the whole history but no file contents until asked: enough to diff a pin against the live state. */
+  fullClone(repo) {
+    const key = `full:${repo}`;
+    let dir = this.clones.get(key);
+    if (!dir) {
+      dir = join(this.dir, `${repo.replace("/", "__")}-full`);
+      run("git", ["clone", "--quiet", "--filter=blob:none", "--no-checkout", "--", `https://github.com/${repo}`, dir]);
+      this.clones.set(key, dir);
+    }
+    return dir;
+  }
+
   /** The live state of one source: { value, note?, link? }. Throws when it cannot be read. */
   async resolve(src) {
     switch (src.kind) {
@@ -519,7 +542,7 @@ async function check(manifestPath, { only, out }) {
           row.pin = resolvePin(src.pin);
           if (!pinShapeOk(src.kind, row.pin)) throw new Error(`the pin "${row.pin}" is not a valid ${src.kind} pin`);
           const state = await live.resolve(src);
-          if (!pinShapeOk(src.kind, state.value)) throw new Error(`unexpected live value "${state.value}"`);
+          if (!pinShapeOk(src.kind, state.value)) throw new Error(`the live value is not a valid ${src.kind} pin`);
           row.live = state.value;
           row.changed = state.value !== row.pin;
           if (state.note) row.note = state.note;
@@ -558,7 +581,7 @@ function issueBody(manifest, standard, sources) {
   return [
     "## Motivation",
     "",
-    `The ${standard.name} spec changed since someone last reviewed it: ${moved.length} of its ${sources.length} watched source(s) no longer match their reviewed pins. ${impact}`.trim(),
+    `${standard.name}: ${moved.length} of ${sources.length} watched source(s) changed since someone last reviewed them, so they no longer match their reviewed pins. ${impact}`.trim(),
     "",
     "## Objective",
     "",
@@ -617,18 +640,20 @@ function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut, o
           gh(["issue", "edit", String(existing.number), "--repo", repo, "--body-file", bodyFile]);
           status[entry.id] = { changed: true, issue: existing.url, since: existing.createdAt.slice(0, 10) };
           console.log(`refreshed ${existing.url}`);
-          const days = Math.floor((Date.now() - Date.parse(existing.createdAt)) / DAY_MS);
+          const age = (Date.now() - Date.parse(existing.createdAt)) / DAY_MS;
+          const days = Math.round(age);
           const escalated = (existing.labels ?? []).some((l) => l.name === escalateLabel);
-          if (escalateDays !== undefined && days >= escalateDays && !escalated) {
-            ensureLabel(repo, escalateLabel, "A spec drift issue nobody has handled in time", "B60205", labels);
-            gh(["issue", "edit", String(existing.number), "--repo", repo, "--add-label", escalateLabel]);
+          if (escalateDays !== undefined && isOverdue(age, escalateDays) && !escalated) {
             const who = escalateMention ? `${escalateMention}: ` : "";
             const commentFile = join(bodyDir, `${entry.id}-escalate.md`);
             writeFileSync(
               commentFile,
               `${who}this has been open for ${days} days. Until someone reviews the change and moves the pins, this project describes or scores a version of the spec that is no longer current. If nothing needs to change, moving the pins is enough.\n`,
             );
+            // Comment first: if it fails, the label is not set yet and the next run tries again.
             gh(["issue", "comment", String(existing.number), "--repo", repo, "--body-file", commentFile]);
+            ensureLabel(repo, escalateLabel, "A spec drift issue nobody has handled in time", "B60205", labels);
+            gh(["issue", "edit", String(existing.number), "--repo", repo, "--add-label", escalateLabel]);
             console.log(`escalated ${existing.url} after ${days} days`);
           }
         } else {
@@ -662,6 +687,15 @@ function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut, o
   if (openedOut) writeFileSync(openedOut, `${JSON.stringify(opened, null, 2)}\n`);
 }
 
+/**
+ * Whether an issue `ageDays` old is due for escalation. Weekly runs drift by
+ * minutes against the issue's creation time, so half a day of slack keeps "14
+ * days" from becoming 21 when a run starts a little early.
+ */
+export function isOverdue(ageDays, afterDays) {
+  return ageDays >= afterDays - 0.5;
+}
+
 /** The watcher's own health as a one-entry report: a failed run opens an issue, the next good run closes it. */
 export function healthReport({ failed, runUrl }) {
   if (!RUN_URL.test(runUrl ?? "")) throw new Error("--run-url must be a GitHub Actions run URL");
@@ -680,7 +714,7 @@ export function healthReport({ failed, runUrl }) {
           "",
           "## Objective",
           "",
-          "Open the run and fix the cause. Usually a watched source could not be read: a file or folder moved, a repository was renamed, a page changed its layout, or a site was down. Fix the source in the manifest (or its pin) and run the watch again. This issue closes on the next run that succeeds.",
+          "Open the run and see which job failed. Most often a watched source could not be read (a file or folder moved, a repository was renamed, a page changed its layout, or a site was down): fix the source in the manifest and run the watch again. A failed script comparison means this repo's `scripts/spec-drift.mjs` no longer matches ax.guide's copy. This issue closes on the next run that succeeds.",
           "",
           "---",
           "_Maintained by the spec drift watch (`scripts/spec-drift.mjs health`)._",
@@ -801,6 +835,158 @@ function lockstep(manifestPath, peerPath, { report, peerScript, out }) {
   if (out) writeFileSync(out, `${JSON.stringify({ entries: [entry] }, null, 2)}\n`);
 }
 
+
+// ---------------------------------------------------------------- fix workflow
+
+const MAX_CONTEXT_CHARS = 300_000;
+
+function capped(text) {
+  return text.length > MAX_CONTEXT_CHARS ? `${text.slice(0, MAX_CONTEXT_CHARS)}\n\n[cut at ${MAX_CONTEXT_CHARS} characters]\n` : text;
+}
+
+/** `git` output, or null when git exits non-zero (an object missing from history, a path that is gone). */
+function gitOr(dir, args) {
+  try {
+    return run("git", ["-C", dir, ...args], { maxBuffer: 64 * 1024 * 1024 });
+  } catch (error) {
+    // git diff --no-index exits 1 when the files differ; its output is still the answer.
+    if (error && error.status === 1 && typeof error.stdout === "string" && error.stdout) return error.stdout;
+    return null;
+  }
+}
+
+/** What changed in one moved source, as Markdown with fenced upstream text. */
+async function describeChange(live, src, pin, current) {
+  const fence = (lang, body) => `\`\`\`\`${lang}\n${body}\n\`\`\`\`\n`;
+  const head = `# ${describeSource(src)}\n\nReviewed pin: \`${pin}\`\nLive: \`${current}\`\n\n`;
+  switch (src.kind) {
+    case "git-path":
+    case "git-head":
+    case "git-latest-tag": {
+      const dir = live.fullClone(src.repo);
+      // A blob or tree pin is diffed object to object; a commit or tag pin, commit to commit.
+      const log =
+        src.kind === "git-path"
+          ? gitOr(dir, ["log", "--date=short", "--format=%h %ad %s", "-n", "40", "HEAD", "--", src.path])
+          : gitOr(dir, ["log", "--date=short", "--format=%h %ad %s", `${pin}..${current}`]);
+      const stat = gitOr(dir, ["diff", "--stat", pin, current]);
+      const diff = gitOr(dir, ["diff", pin, current]);
+      if (diff === null) {
+        const now = src.kind === "git-path" ? gitOr(dir, ["show", `HEAD:${src.path}`]) : null;
+        return `${head}The reviewed state is no longer in the repository's history, so there is no diff.\n\n${now ? `Current content:\n\n${fence("", capped(now))}` : ""}`;
+      }
+      return `${head}Recent commits (untrusted text):\n\n${fence("", log ?? "")}\nChanged files:\n\n${fence("", stat ?? "")}\nDiff:\n\n${fence("diff", capped(diff))}`;
+    }
+    case "git-dated-dirs": {
+      const dir = live.fullClone(src.repo);
+      const diff = gitOr(dir, ["diff", `HEAD:${src.path}/${pin}`, `HEAD:${src.path}/${current}`]);
+      return `${head}A newer dated revision exists. Diff from the reviewed revision folder to the newest one:\n\n${fence("diff", capped(diff ?? "(no diff available)"))}`;
+    }
+    case "ietf-draft": {
+      const name = src.name;
+      const text = async (rev) => (await fetchText(`https://www.ietf.org/archive/id/${name}-${rev}.txt`, 2_000_000)).body;
+      const [oldRev, newRev] = [pin.slice(0, 2), current.slice(0, 2)];
+      const before = await text(oldRev);
+      const after = oldRev === newRev ? before : await text(newRev);
+      const work = mkdtempSync(join(tmpdir(), "spec-drift-ietf-"));
+      try {
+        writeFileSync(join(work, "a.txt"), before);
+        writeFileSync(join(work, "b.txt"), after);
+        const diff = gitOr(work, ["diff", "--no-index", "a.txt", "b.txt"]) ?? "(the revisions are identical)";
+        return `${head}Diff from ${name}-${oldRev} to ${name}-${newRev}:\n\n${fence("diff", capped(diff))}`;
+      } finally {
+        rmSync(work, { recursive: true, force: true });
+      }
+    }
+    case "page": {
+      const { body } = await fetchText(src.url);
+      return `${head}The reviewed text is not kept (only its digest), so this is the page's current text:\n\n${fence("", capped(normalizePage(body) ?? ""))}`;
+    }
+    case "json-field": {
+      const { body } = await fetchText(src.url, 2_000_000);
+      return `${head}The current document:\n\n${fence("json", capped(JSON.stringify(JSON.parse(body), null, 2)))}`;
+    }
+    default:
+      return head;
+  }
+}
+
+/**
+ * Write what changed for the drifted spec whose issue carries `title` into
+ * `out`: one Markdown file per moved source plus `entry.json`. Refuses a title
+ * that no drifted spec in the manifest produces, which keeps the fix agent to
+ * drift issues the watcher itself opened.
+ */
+async function context(manifestPath, { titleFile, out }) {
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const problems = validateManifest(manifest);
+  if (problems.length) throw new Error(`${manifestPath} is not valid`);
+  const title = readFileSync(titleFile, "utf8").trim();
+  const standard = manifest.standards.find((s) => issueTitle(manifest, s) === title);
+  if (!standard) throw new Error("no watched spec has an issue with this title");
+  mkdirSync(out, { recursive: true });
+  const live = new Live();
+  const moved = [];
+  try {
+    for (const [i, src] of standard.sources.entries()) {
+      const pin = resolvePin(src.pin);
+      const state = await live.resolve(src);
+      if (!pinShapeOk(src.kind, state.value)) throw new Error(`the live value of ${sourceKey(src)} is not a valid ${src.kind} pin`);
+      if (state.value === pin) continue;
+      const file = `source-${i + 1}.md`;
+      writeFileSync(join(out, file), await describeChange(live, src, pin, state.value));
+      moved.push({ file, key: sourceKey(src), kind: src.kind, pin, live: state.value });
+    }
+  } finally {
+    live.close();
+  }
+  if (moved.length === 0) throw new Error(`${standard.id} no longer differs from its pins`);
+  writeFileSync(join(out, "entry.json"), `${JSON.stringify({ id: standard.id, name: standard.name, moved }, null, 2)}\n`);
+  console.log(`${standard.id}: wrote ${moved.length} change file(s) to ${out}`);
+}
+
+const PIN_LINE = /^export const [A-Z][A-Z0-9_]* = "[A-Za-z0-9._@:+/-]*";$/;
+
+/**
+ * Problems with a unified diff (`git diff --binary` output) proposed by the
+ * fix agent: every path must match `allow`; a path matching `pinsOnly` may
+ * only change `export const NAME = "value";` lines; no binaries, symlinks,
+ * renames, copies, mode changes or deleted files. Empty when the patch is fine.
+ */
+export function vetPatch(patch, { allow, pinsOnly }) {
+  const problems = [];
+  const files = [];
+  let current = null;
+  for (const line of patch.split("\n")) {
+    const header = /^diff --git a\/(\S+) b\/(\S+)$/.exec(line);
+    if (header) {
+      current = { a: header[1], b: header[2], lines: [] };
+      files.push(current);
+      continue;
+    }
+    if (!current) {
+      if (line.trim()) problems.push("the patch has text before its first file");
+      continue;
+    }
+    if (/^(old mode|new mode|deleted file mode|rename from|rename to|copy from|copy to|similarity index|GIT binary patch|Binary files)/.test(line)) {
+      problems.push(`${current.b}: ${line.split(" ").slice(0, 2).join(" ")} is not allowed`);
+    } else if (/^new file mode /.test(line) && !/^new file mode 100644$/.test(line)) {
+      problems.push(`${current.b}: only regular files may be added`);
+    } else if (/^[+-]/.test(line) && !/^(\+\+\+|---) /.test(line)) {
+      current.lines.push(line);
+    }
+  }
+  if (files.length === 0) problems.push("the patch changes nothing");
+  for (const f of files) {
+    if (f.a !== f.b) problems.push(`${f.b}: renames are not allowed`);
+    if (!allow.test(f.b) || f.b.split("/").includes("..")) problems.push(`${f.b}: outside the paths the fix agent may change`);
+    else if (pinsOnly && pinsOnly.test(f.b)) {
+      for (const l of f.lines) if (!PIN_LINE.test(l.slice(1))) problems.push(`${f.b}: only pin constant lines may change here`);
+    }
+  }
+  return [...new Set(problems)];
+}
+
 // ---------------------------------------------------------------- cli
 
 function option(args, name) {
@@ -829,6 +1015,18 @@ async function main(argv) {
         escalateLabel: option(args, "--escalate-label"),
         escalateMention: option(args, "--escalate-mention"),
       });
+    case "context":
+      return context(args[0], { titleFile: option(args, "--title-file"), out: option(args, "--out") });
+    case "vet-patch": {
+      const allow = option(args, "--allow");
+      const pinsOnly = option(args, "--pins-only");
+      if (!allow) throw new Error("--allow <regex> is required");
+      const problems = vetPatch(readFileSync(args[0], "utf8"), { allow: new RegExp(allow), pinsOnly: pinsOnly ? new RegExp(pinsOnly) : undefined });
+      for (const p of problems) console.log(`- ${p}`);
+      if (problems.length) process.exit(1);
+      console.log("the patch only touches allowed paths");
+      return;
+    }
     case "health": {
       const failed = option(args, "--failed");
       if (failed !== "true" && failed !== "false") throw new Error("--failed must be true or false");
@@ -852,7 +1050,7 @@ async function main(argv) {
       return;
     }
     default:
-      console.error("usage: spec-drift.mjs check|issues|health|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
+      console.error("usage: spec-drift.mjs check|issues|health|context|vet-patch|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
       process.exit(2);
   }
 }
