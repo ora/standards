@@ -106,7 +106,11 @@ jobs:
             git worktree add --orphan -b "$STATUS_BRANCH" "$dir"
           fi
           cp "$RUNNER_TEMP/status-out.json" "$dir/spec-drift.json"
-          git -C "$dir" add spec-drift.json
+          # Vercel reads vercel.json from the commit it deploys, so main's
+          # setting never reaches this branch; without this file every status
+          # commit starts a preview build that fails (the branch has no app).
+          printf '%s\n' '{ "git": { "deploymentEnabled": false } }' > "$dir/vercel.json"
+          git -C "$dir" add spec-drift.json vercel.json
           if git -C "$dir" diff --cached --quiet; then
             echo "status unchanged"
             exit 0
