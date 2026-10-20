@@ -19,11 +19,18 @@
  *       Resolve every source and print pin vs live. Exits 1 when a source
  *       could not be resolved (the report still lists the rest).
  *   node scripts/spec-drift.mjs issues <report.json> --repo <owner/name> [--label <label>]
- *         [--status-in <status.json>] [--status-out <status.json>]
+ *         [--status-in <status.json>] [--status-out <status.json>] [--opened-out <opened.json>]
+ *         [--escalate-after <days> --escalate-label <label> [--escalate-mention <@handle>]]
  *       Open or refresh one issue per drifted spec and close the issue of a
  *       spec whose pins all match again. Needs the gh CLI and GH_TOKEN.
  *       --status-out writes a small public summary (which specs changed, and
- *       the issue that tracks each).
+ *       the issue that tracks each); --opened-out lists the issues this run
+ *       opened, so the workflow can start the fix agent for each. An issue
+ *       still open after --escalate-after days gets the escalate label and
+ *       one comment.
+ *   node scripts/spec-drift.mjs health --failed <true|false> --run-url <url> --out <report.json>
+ *       A one-entry report for the watcher's own health: `issues` then opens
+ *       an issue when a run failed and closes it after the next good run.
  *   node scripts/spec-drift.mjs lockstep <manifest.json> <peer-pins.json> [--report <report.json>]
  *         [--peer-script <spec-drift.mjs>] [--out <report.json>]
  *       Compare this repo's pins with the peer's published pins for every
@@ -52,6 +59,8 @@
  *   ietf-draft     { name }          the IETF draft's latest revision ("01"), plus its state when it is no longer
  *                                    Active ("01 Expired"), so a draft that expires or is replaced drifts too
  *   page           { url }           SHA-256 of the page's normalized <article> (or <main>) text
+ *   json-field     { url, field }    a string field of a JSON document, by dotted path (another
+ *                                    project's published spec label, such as Ora's PAP catalog `profile`)
  *
  * Upstream content is untrusted. Git and HTTP results are only ever matched
  * against strict shapes (hex SHAs, dated names, the manifest's own tag
@@ -77,7 +86,12 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const TAG = /^[A-Za-z0-9._+/-]{1,100}$/;
 // The path part of a redirect target shown in an issue ("served from /docs/0.2/spec").
 const SAFE_PATH = /^\/[A-Za-z0-9._~/-]{0,200}$/;
-const KINDS = ["git-path", "git-head", "git-dated-dirs", "git-latest-tag", "ietf-draft", "page"];
+const KINDS = ["git-path", "git-head", "git-dated-dirs", "git-latest-tag", "ietf-draft", "page", "json-field"];
+// A json-field value that may appear in an issue: a label such as "pap-0.2@2026-10-19", nothing that is markup.
+const LABEL = /^[A-Za-z0-9._@:+/-]{1,100}$/;
+const FIELD_PATH = /^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)*$/;
+const RUN_URL = /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/actions\/runs\/\d+$/;
+const DAY_MS = 86_400_000;
 
 // ---------------------------------------------------------------- page text
 
@@ -188,6 +202,8 @@ export function sourceKey(source) {
       return `${source.kind} ${source.name}`;
     case "page":
       return `${source.kind} ${source.url}`;
+    case "json-field":
+      return `${source.kind} ${source.url} ${source.field}`;
     default:
       return `${source.kind}`;
   }
@@ -233,7 +249,8 @@ function validateSource(src) {
     if (typeof src.match !== "string" || !src.match.startsWith("^") || !src.match.endsWith("$")) problems.push("match must be anchored with ^ and $");
   }
   if (src.kind === "ietf-draft" && !/^draft-[a-z0-9-]+$/.test(src.name ?? "")) problems.push("name must be a draft name such as draft-ietf-x-y");
-  if (src.kind === "page" && !/^https:\/\//.test(src.url ?? "")) problems.push("url must be https");
+  if ((src.kind === "page" || src.kind === "json-field") && !/^https:\/\//.test(src.url ?? "")) problems.push("url must be https");
+  if (src.kind === "json-field" && !FIELD_PATH.test(src.field ?? "")) problems.push("field must be a dotted path such as profile or meta.version");
   const pin = src.pin;
   if (typeof pin === "string") {
     if (!pin) problems.push("pin is empty");
@@ -266,6 +283,8 @@ export function pinShapeOk(kind, value) {
       return /^[0-9a-f]{64}$/.test(value);
     case "git-latest-tag":
       return TAG.test(value);
+    case "json-field":
+      return LABEL.test(value);
     default:
       return false;
   }
@@ -429,6 +448,13 @@ class Live {
         const note = landed === src.url ? undefined : SAFE_PATH.test(path) ? `served from \`${path}\`` : "served from a redirect";
         return { value, link: src.url, note };
       }
+      case "json-field": {
+        const { body } = await fetchText(src.url, 2_000_000);
+        let value = JSON.parse(body);
+        for (const key of src.field.split(".")) value = value !== null && typeof value === "object" && Object.hasOwn(value, key) ? value[key] : undefined;
+        if (typeof value !== "string") throw new Error(`${src.url} has no string at ${src.field}`);
+        return { value, link: src.url };
+      }
       default:
         throw new Error(`unknown kind ${src.kind}`);
     }
@@ -465,6 +491,8 @@ function describeSource(src) {
       return `IETF ${src.name}`;
     case "page":
       return src.url;
+    case "json-field":
+      return `\`${src.field}\` in ${src.url}`;
     default:
       return src.kind;
   }
@@ -552,14 +580,33 @@ function gh(args, opts) {
   return run("gh", args, opts);
 }
 
-function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut }) {
+/** Create a label once per run; it usually exists already, and anything else is a real failure. */
+function ensureLabel(repo, name, description, color, made) {
+  if (made.has(name)) return;
+  try {
+    gh(["label", "create", name, "--repo", repo, "--color", color, "--description", description]);
+  } catch (error) {
+    if (!/already exists/i.test(String(error?.stderr ?? ""))) throw error;
+  }
+  made.add(name);
+}
+
+function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut, openedOut, escalateAfter, escalateLabel, escalateMention }) {
   if (!REPO.test(repo ?? "")) throw new Error("--repo owner/name is required");
+  const escalateDays = escalateAfter === undefined ? undefined : Number(escalateAfter);
+  if (escalateDays !== undefined && (!Number.isInteger(escalateDays) || escalateDays < 1 || !/^[a-z0-9-]{1,50}$/.test(escalateLabel ?? ""))) {
+    throw new Error("--escalate-after needs a whole number of days and --escalate-label a lowercase label");
+  }
+  if (escalateMention !== undefined && !/^@[A-Za-z0-9-]{1,39}(?:\/[A-Za-z0-9_.-]{1,100})?$/.test(escalateMention)) {
+    throw new Error("--escalate-mention must be a GitHub @handle or @org/team");
+  }
   const { entries } = JSON.parse(readFileSync(reportPath, "utf8"));
-  const open = JSON.parse(gh(["issue", "list", "--repo", repo, "--label", label, "--state", "open", "--limit", "200", "--json", "number,title,url,createdAt"]));
+  const open = JSON.parse(gh(["issue", "list", "--repo", repo, "--label", label, "--state", "open", "--limit", "200", "--json", "number,title,url,createdAt,labels"]));
   const previous = statusIn ? readStatus(statusIn) : {};
   const status = {};
+  const opened = [];
   const bodyDir = mkdtempSync(join(tmpdir(), "spec-drift-issue-"));
-  let labelReady = false;
+  const labels = new Set();
   try {
     for (const entry of entries) {
       const existing = open.find((issue) => issue.title === entry.title);
@@ -570,23 +617,32 @@ function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut })
           gh(["issue", "edit", String(existing.number), "--repo", repo, "--body-file", bodyFile]);
           status[entry.id] = { changed: true, issue: existing.url, since: existing.createdAt.slice(0, 10) };
           console.log(`refreshed ${existing.url}`);
-        } else {
-          if (!labelReady) {
-            try {
-              gh(["label", "create", label, "--repo", repo, "--color", "D93F0B", "--description", "A watched spec changed since its last review"]);
-            } catch (error) {
-              // The label usually exists already; anything else is a real failure.
-              if (!/already exists/i.test(String(error?.stderr ?? ""))) throw error;
-            }
-            labelReady = true;
+          const days = Math.floor((Date.now() - Date.parse(existing.createdAt)) / DAY_MS);
+          const escalated = (existing.labels ?? []).some((l) => l.name === escalateLabel);
+          if (escalateDays !== undefined && days >= escalateDays && !escalated) {
+            ensureLabel(repo, escalateLabel, "A spec drift issue nobody has handled in time", "B60205", labels);
+            gh(["issue", "edit", String(existing.number), "--repo", repo, "--add-label", escalateLabel]);
+            const who = escalateMention ? `${escalateMention}: ` : "";
+            const commentFile = join(bodyDir, `${entry.id}-escalate.md`);
+            writeFileSync(
+              commentFile,
+              `${who}this has been open for ${days} days. Until someone reviews the change and moves the pins, this project describes or scores a version of the spec that is no longer current. If nothing needs to change, moving the pins is enough.\n`,
+            );
+            gh(["issue", "comment", String(existing.number), "--repo", repo, "--body-file", commentFile]);
+            console.log(`escalated ${existing.url} after ${days} days`);
           }
+        } else {
+          ensureLabel(repo, label, "Opened by the spec drift watch", "D93F0B", labels);
           const url = gh(["issue", "create", "--repo", repo, "--title", entry.title, "--label", label, "--body-file", bodyFile]).trim();
           status[entry.id] = { changed: true, issue: url, since: new Date().toISOString().slice(0, 10) };
+          const number = /\/issues\/(\d+)$/.exec(url)?.[1];
+          if (number) opened.push({ id: entry.id, number: Number(number), url });
           console.log(`opened ${url}`);
         }
       } else if (entry.state === "clean") {
         if (existing) {
-          gh(["issue", "close", String(existing.number), "--repo", repo, "--comment", "Every watched source matches its reviewed pin again - closing."]);
+          const comment = entry.close_comment ?? "Every watched source matches its reviewed pin again - closing.";
+          gh(["issue", "close", String(existing.number), "--repo", repo, "--comment", comment]);
           console.log(`closed ${existing.url}`);
         }
         status[entry.id] = { changed: false };
@@ -603,6 +659,37 @@ function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut })
     const standards = Object.fromEntries(Object.entries(status).sort(([a], [b]) => a.localeCompare(b)));
     writeFileSync(statusOut, `${JSON.stringify({ standards }, null, 2)}\n`);
   }
+  if (openedOut) writeFileSync(openedOut, `${JSON.stringify(opened, null, 2)}\n`);
+}
+
+/** The watcher's own health as a one-entry report: a failed run opens an issue, the next good run closes it. */
+export function healthReport({ failed, runUrl }) {
+  if (!RUN_URL.test(runUrl ?? "")) throw new Error("--run-url must be a GitHub Actions run URL");
+  return {
+    entries: [
+      {
+        id: "watch-health",
+        name: "spec drift watch",
+        state: failed ? "drift" : "clean",
+        title: "The spec drift watch failed - spec changes may be going unnoticed",
+        close_comment: `The latest run succeeded (${runUrl}) - closing.`,
+        body: [
+          "## Motivation",
+          "",
+          `The latest spec drift watch run failed (${runUrl}). While it fails, a spec can change without anyone being told.`,
+          "",
+          "## Objective",
+          "",
+          "Open the run and fix the cause. Usually a watched source could not be read: a file or folder moved, a repository was renamed, a page changed its layout, or a site was down. Fix the source in the manifest (or its pin) and run the watch again. This issue closes on the next run that succeeds.",
+          "",
+          "---",
+          "_Maintained by the spec drift watch (`scripts/spec-drift.mjs health`)._",
+          "",
+        ].join("\n"),
+        sources: [],
+      },
+    ],
+  };
 }
 
 function readStatus(path) {
@@ -691,6 +778,7 @@ function lockstep(manifestPath, peerPath, { report, peerScript, out }) {
     name: peerName,
     state: problems.length ? "drift" : "clean",
     title: lockstepIssue.title ?? `Spec pins disagree with ${peerName}`,
+    close_comment: `The pins agree with ${peerName} again - closing.`,
     body: [
       "## Motivation",
       "",
@@ -736,7 +824,19 @@ async function main(argv) {
         label: option(args, "--label"),
         statusIn: option(args, "--status-in"),
         statusOut: option(args, "--status-out"),
+        openedOut: option(args, "--opened-out"),
+        escalateAfter: option(args, "--escalate-after"),
+        escalateLabel: option(args, "--escalate-label"),
+        escalateMention: option(args, "--escalate-mention"),
       });
+    case "health": {
+      const failed = option(args, "--failed");
+      if (failed !== "true" && failed !== "false") throw new Error("--failed must be true or false");
+      const report = healthReport({ failed: failed === "true", runUrl: option(args, "--run-url") });
+      writeFileSync(option(args, "--out") ?? "health.json", `${JSON.stringify(report, null, 2)}\n`);
+      console.log(failed === "true" ? "recorded a failed run" : "recorded a good run");
+      return;
+    }
     case "lockstep":
       return lockstep(args[0], args[1], { report: option(args, "--report"), peerScript: option(args, "--peer-script"), out: option(args, "--out") });
     case "page-text":
@@ -752,7 +852,7 @@ async function main(argv) {
       return;
     }
     default:
-      console.error("usage: spec-drift.mjs check|issues|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
+      console.error("usage: spec-drift.mjs check|issues|health|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
       process.exit(2);
   }
 }
