@@ -74,6 +74,10 @@ const MAX_PAGE_BYTES = 5_000_000;
 const REPO = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const SHA = /^[0-9a-f]{40}$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+// A release tag that may appear in an issue: Git allows backticks and brackets in ref names, so the manifest's own `match` is not enough.
+const TAG = /^[A-Za-z0-9._+/-]{1,100}$/;
+// The path part of a redirect target shown in an issue ("served from /docs/0.2/spec").
+const SAFE_PATH = /^\/[A-Za-z0-9._~/-]{0,200}$/;
 const KINDS = ["git-path", "git-head", "git-dated-dirs", "git-latest-tag", "ietf-draft", "page"];
 
 // ---------------------------------------------------------------- page text
@@ -90,12 +94,56 @@ function decodeEntities(text) {
   });
 }
 
+/** The index just past the first "<tag" at or after `from` that ends at a word boundary, or -1. Case-insensitive. */
+function findOpen(html, tag, from) {
+  const re = new RegExp(`<${tag}\\b`, "gi");
+  re.lastIndex = from;
+  const m = re.exec(html);
+  return m ? m.index : -1;
+}
+
+/** The start of the last "</tag>" in `html`, or -1. Case-insensitive. */
+function findLastClose(html, tag) {
+  const re = new RegExp(`</${tag}>`, "gi");
+  let last = -1;
+  for (let m = re.exec(html); m; m = re.exec(html)) last = m.index;
+  return last;
+}
+
+// Each scanner below gives exactly what its regular expression gives
+// (`<tag\b[^>]*>([\s\S]*)</tag>`, `<!--[\s\S]*?-->`, ...) but in linear time:
+// the regexes rescan to the end of the page from every unclosed opener, which
+// a crafted page can make quadratic. Same output, so existing pins stay valid.
+
 function extractContent(html) {
   for (const tag of ["article", "main"]) {
-    const m = html.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*)</${tag}>`, "i"));
-    if (m) return m[1];
+    const open = findOpen(html, tag, 0);
+    if (open === -1) continue;
+    const openEnd = html.indexOf(">", open);
+    const close = findLastClose(html, tag);
+    // A later opener ends later still, so if the first cannot fit before the last close, none can.
+    if (openEnd === -1 || close === -1 || openEnd + 1 > close) continue;
+    return html.slice(openEnd + 1, close);
   }
   return null;
+}
+
+/** Replace every `start ... end` run (shortest, left to right) with a space; an unclosed start is left as text. */
+function replaceRuns(text, startRe, end) {
+  const endRe = new RegExp(end.replace(/[/]/g, "\\/"), "gi");
+  let out = "";
+  let pos = 0;
+  startRe.lastIndex = 0;
+  for (let m = startRe.exec(text); m; m = startRe.exec(text)) {
+    endRe.lastIndex = m.index + m[0].length;
+    const close = endRe.exec(text);
+    // No end after this start means none after any later start either.
+    if (!close) break;
+    out += `${text.slice(pos, m.index)} `;
+    pos = close.index + close[0].length;
+    startRe.lastIndex = pos;
+  }
+  return out + text.slice(pos);
 }
 
 /**
@@ -108,11 +156,10 @@ function extractContent(html) {
 export function normalizePage(html) {
   const content = extractContent(html);
   if (content === null) return null;
-  const stripped = content
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]*>/g, " ");
+  let stripped = replaceRuns(content, /<!--/g, "-->");
+  stripped = replaceRuns(stripped, /<script\b/gi, "</script>");
+  stripped = replaceRuns(stripped, /<style\b/gi, "</style>");
+  stripped = replaceRuns(stripped, /</g, ">");
   return decodeEntities(stripped).replace(/\s+/g, " ").trim();
 }
 
@@ -218,8 +265,10 @@ export function pinShapeOk(kind, value) {
       return /^\d{2}(?: [A-Za-z][A-Za-z ()-]{0,40})?$/.test(value);
     case "page":
       return /^[0-9a-f]{64}$/.test(value);
+    case "git-latest-tag":
+      return TAG.test(value);
     default:
-      return value.length > 0 && value.length <= 100;
+      return false;
   }
 }
 
@@ -251,17 +300,52 @@ export function compareVersions(a, b) {
   return 0;
 }
 
+const MAX_REDIRECTS = 5;
+
+/**
+ * GET a URL as text. Redirects are followed only within the URL's own origin
+ * (the PAP pages redirect to their current draft's folder), so a page cannot
+ * send the watcher to another host, and the body is read in chunks and cut
+ * off at `maxBytes`. `landed` is the URL that finally answered.
+ */
 async function fetchText(url, maxBytes = MAX_PAGE_BYTES) {
-  const res = await fetch(url, {
-    headers: { "user-agent": USER_AGENT },
-    redirect: "follow",
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
-  if (!res.url.startsWith("https://")) throw new Error(`${url} redirected off https`);
-  const body = await res.text();
-  if (body.length > maxBytes) throw new Error(`${url} is larger than ${maxBytes} bytes`);
-  return { body, landed: res.url };
+  const origin = new URL(url).origin;
+  let current = url;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const res = await fetch(current, {
+      headers: { "user-agent": USER_AGENT },
+      redirect: "manual",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    const location = res.headers.get("location");
+    if (res.status >= 300 && res.status < 400 && location) {
+      await res.body?.cancel();
+      const next = new URL(location, current);
+      if (next.origin !== origin) throw new Error(`${url} redirected to another origin`);
+      current = next.href;
+      continue;
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status} from ${current}`);
+    return { body: await readCapped(res, maxBytes, url), landed: current };
+  }
+  throw new Error(`${url} redirected more than ${MAX_REDIRECTS} times`);
+}
+
+async function readCapped(res, maxBytes, url) {
+  const chunks = [];
+  let size = 0;
+  if (res.body) {
+    const reader = res.body.getReader();
+    for (let r = await reader.read(); !r.done; r = await reader.read()) {
+      size += r.value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        throw new Error(`${url} is larger than ${maxBytes} bytes`);
+      }
+      chunks.push(r.value);
+    }
+  }
+  return new TextDecoder("utf-8").decode(Buffer.concat(chunks));
 }
 
 class Live {
@@ -319,7 +403,7 @@ class Live {
         const tags = run("git", ["ls-remote", "--tags", "--refs", "--", `https://github.com/${src.repo}`])
           .split("\n")
           .map((line) => line.split("refs/tags/")[1]?.trim() ?? "")
-          .filter((tag) => tag && match.test(tag))
+          .filter((tag) => TAG.test(tag) && match.test(tag))
           .sort(compareVersions);
         const value = tags.at(-1);
         if (!value) throw new Error(`no tag in ${src.repo} matches ${src.match}`);
@@ -341,7 +425,10 @@ class Live {
         const { body, landed } = await fetchText(src.url);
         const value = pageDigest(body);
         if (!value) throw new Error(`no <article> or <main> text at ${src.url}`);
-        return { value, link: src.url, note: landed !== src.url ? `served from ${landed}` : undefined };
+        // The redirect target is the page operator's text: show only its path, and only when it is plain.
+        const path = new URL(landed).pathname;
+        const note = landed === src.url ? undefined : SAFE_PATH.test(path) ? `served from \`${path}\`` : "served from a redirect";
+        return { value, link: src.url, note };
       }
       default:
         throw new Error(`unknown kind ${src.kind}`);
@@ -558,6 +645,10 @@ export function compareWithPeer(manifest, peerPins, { live = new Map(), sameScri
         continue;
       }
       const ours = resolvePin(src.pin);
+      if (!pinShapeOk(theirs.kind, theirs.pin)) {
+        problems.push(`**${standard.name}**: ${peerName}'s pin for ${describeSource(src)} is not a valid ${src.kind} pin.`);
+        continue;
+      }
       if (ours !== theirs.pin) {
         const now = live.get(`${standard.id} ${key}`);
         const behind = now === undefined ? "" : now === ours ? ` ${peerName} is behind the live spec.` : now === theirs.pin ? " This repo is behind the live spec." : " Neither matches the live spec.";
@@ -566,7 +657,8 @@ export function compareWithPeer(manifest, peerPins, { live = new Map(), sameScri
     }
   }
   for (const peer of peerPins.standards) {
-    if (!claimed.has(peer.id)) problems.push(`**${peer.name}**: ${peerName} watches it, but no standard here names \`${peer.id}\` as its peer.`);
+    // Only the peer's id (already held to the id pattern) reaches the issue, never its free-text name.
+    if (!claimed.has(peer.id)) problems.push(`${peerName} watches \`${peer.id}\`, but no standard here names it as its peer.`);
   }
   if (!sameScript) problems.push(`\`scripts/spec-drift.mjs\` differs from ${peerName}'s copy. The two must stay identical.`);
   return problems;

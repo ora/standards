@@ -24,6 +24,9 @@ export interface SpecDrift {
   issue?: string;
 }
 
+/** An issue on this repository, and nothing that a browser could resolve elsewhere ("/issues/../.."). */
+const ISSUE_URL = new RegExp(`^${content.repo.url.replace(/[.]/g, "\\.")}/issues/\\d+$`);
+
 /** How often a page reads the status again, in seconds. Pages that call getSpecDrift use the same value. */
 export const SPEC_DRIFT_REVALIDATE = 3600;
 
@@ -54,6 +57,5 @@ export async function getSpecDrift(id: string): Promise<SpecDrift | null> {
   }
   const entry = parsed.data.standards[id];
   if (!entry?.changed) return null;
-  const ours = entry.issue?.startsWith(`${content.repo.url}/issues/`);
-  return ours ? { issue: entry.issue } : {};
+  return entry.issue && ISSUE_URL.test(entry.issue) ? { issue: entry.issue } : {};
 }

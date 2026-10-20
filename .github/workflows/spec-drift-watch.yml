@@ -18,18 +18,48 @@ on:
     - cron: "17 5 * * 1"
   workflow_dispatch:
 
+# Two jobs, so the job that reads upstream repositories and pages holds no
+# write token: `check` runs read-only and hands its report to `report`,
+# which alone can write issues and the status branch.
 permissions:
-  contents: write # push the status file to the spec-drift-status branch only
-  issues: write
+  contents: read
 
 concurrency:
   group: spec-drift-watch
   cancel-in-progress: false
 
 jobs:
-  watch:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      outcome: ${{ steps.check.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Compare every spec with its pins
+        id: check
+        continue-on-error: true
+        run: node scripts/spec-drift.mjs check spec-pins.json --out "$RUNNER_TEMP/report.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: spec-drift-report
+          path: ${{ runner.temp }}/report.json
+          retention-days: 7
+
+  report:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # push the status file to the spec-drift-status branch only
+      issues: write
     env:
       GH_TOKEN: ${{ github.token }}
       STATUS_BRANCH: spec-drift-status
@@ -38,6 +68,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+      - uses: actions/download-artifact@v4
+        with:
+          name: spec-drift-report
+          path: ${{ runner.temp }}
 
       - name: Read the last published status
         run: |
@@ -46,11 +80,6 @@ jobs:
             git fetch --depth 1 origin "+refs/heads/$STATUS_BRANCH:refs/remotes/origin/$STATUS_BRANCH"
             git show "origin/$STATUS_BRANCH:spec-drift.json" > "$RUNNER_TEMP/status-in.json"
           fi
-
-      - name: Compare every spec with its pins
-        id: check
-        continue-on-error: true
-        run: node scripts/spec-drift.mjs check spec-pins.json --out "$RUNNER_TEMP/report.json"
 
       - name: Open, refresh or close the drift issues
         run: |
@@ -77,7 +106,7 @@ jobs:
           git -C "$dir" push origin "HEAD:refs/heads/$STATUS_BRANCH"
 
       - name: Fail when a spec could not be read
-        if: steps.check.outcome == 'failure'
+        if: needs.check.outputs.outcome == 'failure'
         run: |
           echo "At least one spec source could not be read; see the check step. Its issue was left as it was."
           exit 1
