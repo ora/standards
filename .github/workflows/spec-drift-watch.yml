@@ -8,8 +8,14 @@ name: spec drift watch
 # `spec-drift-status` branch, which the standard pages read to show "The spec
 # changed after this check."
 #
-# The check itself is scripts/spec-drift.mjs, shared byte for byte with Ora's
-# watcher (eralabs-ai/ora). It needs no npm install. Upstream content never
+# An issue still open after 14 days is escalated once (a label and a comment
+# that mentions a maintainer). Each newly opened issue starts
+# spec-drift-fix.yml, which asks Claude to recheck the page and open a pull
+# request. A run that fails opens its own issue, closed by the next good run.
+#
+# The check itself is scripts/spec-drift.mjs, shared byte for byte with Ora
+# (eralabs-ai/ora) and poppy.ax (ora/poppy-ax), whose watchers compare their
+# copy with this one; change it here first. It needs no npm install. Upstream content never
 # reaches a shell: the script runs git and gh with argument arrays, and only
 # hashes, revision names and digests reach the issues.
 
@@ -60,6 +66,7 @@ jobs:
     permissions:
       contents: write # push the status file to the spec-drift-status branch only
       issues: write
+      actions: write # start spec-drift-fix.yml for each newly opened issue
     env:
       GH_TOKEN: ${{ github.token }}
       STATUS_BRANCH: spec-drift-status
@@ -84,7 +91,9 @@ jobs:
       - name: Open, refresh or close the drift issues
         run: |
           node scripts/spec-drift.mjs issues "$RUNNER_TEMP/report.json" --repo "$GITHUB_REPOSITORY" \
-            --status-in "$RUNNER_TEMP/status-in.json" --status-out "$RUNNER_TEMP/status-out.json"
+            --status-in "$RUNNER_TEMP/status-in.json" --status-out "$RUNNER_TEMP/status-out.json" \
+            --opened-out "$RUNNER_TEMP/opened.json" \
+            --escalate-after 14 --escalate-label spec-drift-overdue --escalate-mention @liady
 
       - name: Publish the status for the site
         run: |
@@ -105,8 +114,47 @@ jobs:
           git -C "$dir" commit --quiet -m "chore: update spec drift status"
           git -C "$dir" push origin "HEAD:refs/heads/$STATUS_BRANCH"
 
+      # After the status publish and allowed to fail: a refused dispatch must
+      # not cost the site its status. A fix run that never started can be
+      # retried by hand.
+      - name: Ask Claude to fix each newly opened issue
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: |
+          # Only issues this run opened; none when the issues step never got that far.
+          [ -f "$RUNNER_TEMP/opened.json" ] || exit 0
+          # Issue numbers come from the script, which only records digits.
+          for n in $(jq -r '.[].number' "$RUNNER_TEMP/opened.json"); do
+            gh workflow run spec-drift-fix.yml --repo "$GITHUB_REPOSITORY" -f issue="$n"
+          done
+
       - name: Fail when a spec could not be read
         if: needs.check.outputs.outcome == 'failure'
         run: |
           echo "At least one spec source could not be read; see the check step. Its issue was left as it was."
           exit 1
+
+  health:
+    needs: [check, report]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      # A cancelled run is not a failure.
+      FAILED: ${{ contains(needs.*.result, 'failure') || needs.check.outputs.outcome == 'failure' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Open or close the watch-failed issue
+        run: |
+          node scripts/spec-drift.mjs health --failed "$FAILED" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --out "$RUNNER_TEMP/health.json"
+          node scripts/spec-drift.mjs issues "$RUNNER_TEMP/health.json" --repo "$GITHUB_REPOSITORY" --label spec-drift-watch

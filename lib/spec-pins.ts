@@ -12,6 +12,8 @@ export const SPEC_PINS_FILE = "spec-pins.json";
 export function specPins(standards: Standard[], siteUrl = "https://ax.guide") {
   return {
     $comment: "Generated from the spec_sources field in content/standards. Run `npm run pins` after changing one.",
+    // Where each standard's pins are edited, for the fix workflow's `spec-drift.mjs apply-pins`.
+    pin_file: "content/standards/{id}.md",
     issue: {
       title: "{name}: the spec changed since ax.guide last checked it",
       impact: "The page at {page} describes the state that was read, so it may now say something the spec no longer does.",

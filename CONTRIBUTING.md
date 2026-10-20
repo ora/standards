@@ -48,7 +48,11 @@ A partner list is not adoption, and a transaction count is not commerce. If a nu
 
 Every standard lists where its spec lives in `spec_sources`, with a `pin`: the exact state of the spec that was read (a Git SHA, a release tag, a draft revision, or a digest of a page's text). Once a week a check ([`scripts/spec-drift.mjs`](scripts/spec-drift.mjs), run by [`spec-drift-watch.yml`](.github/workflows/spec-drift-watch.yml)) compares each spec with its pins. When one changed, it opens an issue that links what changed, and the standard's page says "The spec changed after this check" until the pins move. The template lists the kinds of source.
 
-When you handle one of those issues:
+An issue still open after 14 days gets the `spec-drift-overdue` label and a comment that mentions a maintainer. If the run itself fails, it opens a separate issue, which closes after the next good run.
+
+When the repository has a Claude key (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` secret), each new issue also starts [`spec-drift-fix.yml`](.github/workflows/spec-drift-fix.yml). It opens a pull request that moves the pins and carries Claude's review of the change: what changed, which claims on the page still hold, and suggested edits with sources. Claude only writes that review (it reads files, with no shell, web access or GitHub token), so make the edits on the pull request's branch yourself, after checking them. A newer dated revision (ACP's spec folders) is never adopted automatically; the review is posted on the issue instead. Close and reopen that pull request to run CI on it. You can start the workflow by hand for any open drift issue from the Actions tab.
+
+When you handle one of those issues yourself:
 
 1. Read what changed and recheck the page against it.
 2. Set each moved `pin` to the live value the issue lists, even when nothing on the page needed to change: moving a pin is the record that someone read the change.
