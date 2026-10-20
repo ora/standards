@@ -35,10 +35,12 @@
  *       live state, both IETF revisions, a page's text, a JSON document), so
  *       the agent that drafts a fix needs no network. Exits 1 when no drifted
  *       spec has that title.
- *   node scripts/spec-drift.mjs vet-patch <patch> --allow <regex> [--pins-only <regex>]
+ *   node scripts/spec-drift.mjs vet-patch <patch> --allow <regex> [--pins-only <regex>] [--plain <regex>]
  *       For the fix workflow: refuse a patch that touches a path outside
- *       --allow, adds a binary, symlink, rename or mode change, or changes a
- *       --pins-only file anywhere but its `export const X = "..."` lines.
+ *       --allow, adds a binary, symlink, rename or mode change, changes a
+ *       --pins-only file anywhere but its `export const X = "..."` lines, or
+ *       adds markup or code (`<`, `{`, `}`, import or export lines) to a
+ *       --plain file, such as MDX that a site build would run.
  *   node scripts/spec-drift.mjs health --failed <true|false> --run-url <url> --out <report.json>
  *       A one-entry report for the watcher's own health: `issues` then opens
  *       an issue when a run failed and closes it after the next good run.
@@ -951,9 +953,11 @@ const PIN_LINE = /^export const [A-Z][A-Z0-9_]* = "[A-Za-z0-9._@:+/-]*";$/;
  * Problems with a unified diff (`git diff --binary` output) proposed by the
  * fix agent: every path must match `allow`; a path matching `pinsOnly` may
  * only change `export const NAME = "value";` lines; no binaries, symlinks,
- * renames, copies, mode changes or deleted files. Empty when the patch is fine.
+ * renames, copies, mode changes or deleted files; a path matching `plain` may
+ * gain no `<`, `{`, `}` or import/export lines (MDX compiles those to code
+ * that a site build runs). Empty when the patch is fine.
  */
-export function vetPatch(patch, { allow, pinsOnly }) {
+export function vetPatch(patch, { allow, pinsOnly, plain }) {
   const problems = [];
   const files = [];
   let current = null;
@@ -982,6 +986,10 @@ export function vetPatch(patch, { allow, pinsOnly }) {
     if (!allow.test(f.b) || f.b.split("/").includes("..")) problems.push(`${f.b}: outside the paths the fix agent may change`);
     else if (pinsOnly && pinsOnly.test(f.b)) {
       for (const l of f.lines) if (!PIN_LINE.test(l.slice(1))) problems.push(`${f.b}: only pin constant lines may change here`);
+    } else if (plain && plain.test(f.b)) {
+      for (const l of f.lines) {
+        if (l.startsWith("+") && (/[<{}]/.test(l) || /^\+\s*(import|export)\b/.test(l))) problems.push(`${f.b}: added lines may not contain markup or code here`);
+      }
     }
   }
   return [...new Set(problems)];
@@ -1021,7 +1029,12 @@ async function main(argv) {
       const allow = option(args, "--allow");
       const pinsOnly = option(args, "--pins-only");
       if (!allow) throw new Error("--allow <regex> is required");
-      const problems = vetPatch(readFileSync(args[0], "utf8"), { allow: new RegExp(allow), pinsOnly: pinsOnly ? new RegExp(pinsOnly) : undefined });
+      const plain = option(args, "--plain");
+      const problems = vetPatch(readFileSync(args[0], "utf8"), {
+        allow: new RegExp(allow),
+        pinsOnly: pinsOnly ? new RegExp(pinsOnly) : undefined,
+        plain: plain ? new RegExp(plain) : undefined,
+      });
       for (const p of problems) console.log(`- ${p}`);
       if (problems.length) process.exit(1);
       console.log("the patch only touches allowed paths");
