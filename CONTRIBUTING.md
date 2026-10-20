@@ -50,7 +50,7 @@ Every standard lists where its spec lives in `spec_sources`, with a `pin`: the e
 
 An issue still open after 14 days gets the `spec-drift-overdue` label and a comment that mentions a maintainer. If the run itself fails, it opens a separate issue, which closes after the next good run.
 
-When the repository has a Claude key (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` secret), each new issue also starts [`spec-drift-fix.yml`](.github/workflows/spec-drift-fix.yml). The workflow gathers what changed upstream, Claude rechecks the page and moves the pins (it can only read and edit files, with no shell, web access or GitHub token), and a final step that runs no model checks that only `content/standards/*.md` changed before it opens a pull request for a maintainer to review. Close and reopen that pull request to run CI on it. You can start the workflow by hand for any open drift issue from the Actions tab.
+When the repository has a Claude key (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` secret), each new issue also starts [`spec-drift-fix.yml`](.github/workflows/spec-drift-fix.yml). It opens a pull request that moves the pins and carries Claude's review of the change: what changed, which claims on the page still hold, and suggested edits with sources. Claude only writes that review (it reads files, with no shell, web access or GitHub token), so make the edits on the pull request's branch yourself, after checking them. Close and reopen that pull request to run CI on it. You can start the workflow by hand for any open drift issue from the Actions tab.
 
 When you handle one of those issues yourself:
 

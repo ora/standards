@@ -35,15 +35,20 @@
  *       live state, both IETF revisions, a page's text, a JSON document), so
  *       the agent that drafts a fix needs no network. Exits 1 when no drifted
  *       spec has that title.
- *   node scripts/spec-drift.mjs vet-staged --allow <regex> [--pins-only <regex>] [--plain <regex>] [--json-pins <regex>]
- *       For the fix workflow, after `git apply --index` of the agent's patch:
- *       ask git what is staged and refuse anything but plain added or modified
- *       files under --allow; in --pins-only files only `export const X = "..."`
- *       lines may change; --plain files may gain no `<`, `{`, `}` or
- *       import/export lines (MDX compiles those to code); in --json-pins files
- *       only string `pin` values may differ.
+ *   node scripts/spec-drift.mjs apply-pins <manifest.json> --entry <entry.json>
+ *       For the fix workflow: set each moved pin listed in entry.json (written
+ *       by `context`) to its live value, in the place the manifest keeps it:
+ *       a `NAME = "..."` constant ({ file, constant }), the file named by the
+ *       manifest's `pin_file` (ax.guide's page front matter), or the manifest
+ *       itself. No model writes anything that gets committed.
+ *   node scripts/spec-drift.mjs vet-staged --allow <regex> [--pins-only <regex>] [--json-pins <regex>] [--manifest <manifest.json>]
+ *       For the fix workflow, after the pins are staged: ask git what is staged
+ *       and refuse anything but plain added or modified files under --allow;
+ *       in --pins-only files every removed line must be a pin line paired with
+ *       an added pin line of the same name; in --json-pins files only string
+ *       `pin` values may differ.
  *   node scripts/spec-drift.mjs pr-body <in.md> --out <out.md>
- *       For the fix workflow: the agent's pull request text with HTML
+ *       For the fix workflow: the agent's review with HTML and Markdown
  *       comments removed, closing keywords and @mentions defused and length
  *       capped. Exits 1 when it holds something shaped like a secret.
  *   node scripts/spec-drift.mjs health --failed <true|false> --run-url <url> --out <report.json>
@@ -953,7 +958,8 @@ async function context(manifestPath, { titleFile, out }) {
   console.log(`${standard.id}: wrote ${moved.length} change file(s) to ${out}`);
 }
 
-const PIN_LINE = /^export const [A-Z][A-Z0-9_]* = "[A-Za-z0-9._@:+/-]*";$/;
+// A pin line, by its name: a TypeScript constant or a YAML `pin:` field (ax.guide's front matter).
+const PIN_LINE = /^(?:export const ([A-Z][A-Z0-9_]*) = "[A-Za-z0-9._@:+/-]*";|\s+(pin): "[A-Za-z0-9._@:+/ -]*")$/;
 
 /** git, with nothing in the checkout able to make it run a command. */
 function safeGit(cwd, args) {
@@ -1007,11 +1013,11 @@ function withoutPins(value) {
  * Problems with what is staged in `cwd` (the agent's patch after `git apply
  * --index`), read from git itself rather than from the patch text: only
  * regular files added or modified under `allow`; in `pinsOnly` files only
- * `export const NAME = "value";` lines change; `plain` files gain no `<`,
- * `{`, `}` or import/export lines; in `jsonPins` files only string `pin`
- * values differ. Empty when the change is fine.
+ * the values of existing pin lines change (and, given `pinNames`, only
+ * constants the manifest names as pins); in `jsonPins` files only string
+ * `pin` values differ. Empty when the change is fine.
  */
-export function vetStaged(cwd, { allow, pinsOnly, plain, jsonPins }) {
+export function vetStaged(cwd, { allow, pinsOnly, jsonPins, pinNames }) {
   const problems = [];
   const fields = safeGit(cwd, ["diff", "--cached", "--name-status", "--no-renames", "-z"]).split("\0").filter(Boolean);
   if (fields.length === 0) return ["the agent changed nothing"];
@@ -1036,10 +1042,13 @@ export function vetStaged(cwd, { allow, pinsOnly, plain, jsonPins }) {
     }
     if (pinsOnly && pinsOnly.test(path)) {
       const { added, removed } = stagedLines(cwd, path);
-      if ([...added, ...removed].some((l) => !PIN_LINE.test(l))) problems.push(`${path}: only pin constant lines may change here`);
-    } else if (plain && plain.test(path)) {
-      const { added } = stagedLines(cwd, path);
-      if (added.some((l) => /[<{}]/.test(l) || /^\s*(import|export)\b/.test(l))) problems.push(`${path}: added lines may not contain markup or code here`);
+      const names = (lines) => lines.map((l) => PIN_LINE.exec(l)).map((m) => (m ? m[1] ?? m[2] : null));
+      const [gone, came] = [names(removed), names(added)];
+      // Every changed line is a pin line, and each pin that lost a value gained one: values move, nothing else.
+      const known = (n) => n !== null && (n === "pin" || !pinNames || pinNames.has(n));
+      if (![...gone, ...came].every(known) || gone.sort().join() !== came.sort().join()) {
+        problems.push(`${path}: only pin values may change here`);
+      }
     } else if (jsonPins && jsonPins.test(path)) {
       try {
         const oldDoc = status === "M" ? JSON.parse(safeGit(cwd, ["show", `HEAD:${path}`])) : undefined;
@@ -1065,10 +1074,46 @@ const SECRET = /\b(sk-ant-[A-Za-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pa
  */
 export function cleanPrBody(text) {
   if (SECRET.test(text)) throw new Error("the description holds something shaped like a secret");
-  let body = text.replace(/<!--[\s\S]*?(-->|$)/g, "");
-  body = body.replace(/\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)(\s*:?\s+)((?:[\w.-]+\/[\w.-]+)?#\d+)/gi, "$1$2`$3`");
-  body = body.replace(/(^|[^`\w])@([A-Za-z0-9-]+(?:\/[A-Za-z0-9_.-]+)?)/g, "$1`@$2`");
+  let body = text
+    .replace(/<!--[\s\S]*?(-->|$)/g, "")
+    .replace(/^\s*\[[^\]]*\]:\s*#.*$/gm, "");
+  // "Fixes #12", "closes owner/repo#3", "resolves https://github.com/o/r/issues/4": GitHub acts on these when the pull request merges.
+  body = body.replace(/\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)\b(?=\s*:?\s+(?:[\w.-]+\/[\w.-]+)?#\d|\s*:?\s+https?:\/\/\S+\/(?:issues|pull)\/\d)/gi, "see");
+  // A word joiner after @ keeps a handle readable and stops the mention.
+  body = body.replace(/@(?=[A-Za-z0-9-])/g, "@\u2060");
   return body.length > 20_000 ? `${body.slice(0, 20_000)}\n\n[cut at 20,000 characters]\n` : body;
+}
+
+/**
+ * Set each pin that `context` found moved to its live value. The values were
+ * shape-checked when `context` read them; this checks them again, finds the
+ * one place the manifest keeps each pin, and refuses anything ambiguous.
+ */
+function applyPins(manifestPath, entryPath) {
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const entry = JSON.parse(readFileSync(entryPath, "utf8"));
+  const standard = manifest.standards.find((s) => s.id === entry.id);
+  if (!standard) throw new Error(`no standard ${entry.id} in ${manifestPath}`);
+  const replaceOnce = (file, from, to) => {
+    const text = readFileSync(file, "utf8");
+    const count = text.split(from).length - 1;
+    if (count !== 1) throw new Error(`${file}: expected the pin exactly once, found it ${count} times`);
+    writeFileSync(file, text.replace(from, () => to));
+  };
+  for (const move of entry.moved) {
+    const src = standard.sources.find((s) => sourceKey(s) === move.key);
+    if (!src) throw new Error(`${entry.id} has no source ${move.key}`);
+    if (resolvePin(src.pin) !== move.pin) throw new Error(`${move.key}: the pin is no longer ${move.pin}`);
+    if (!pinShapeOk(src.kind, move.live)) throw new Error(`${move.key}: the live value is not a valid ${src.kind} pin`);
+    if (typeof src.pin === "object") {
+      replaceOnce(src.pin.file, `${src.pin.constant} = "${move.pin}"`, `${src.pin.constant} = "${move.live}"`);
+    } else if (manifest.pin_file) {
+      replaceOnce(fill(manifest.pin_file, standard), `"${move.pin}"`, `"${move.live}"`);
+    } else {
+      replaceOnce(manifestPath, `"pin": "${move.pin}"`, `"pin": "${move.live}"`);
+    }
+    console.log(`${move.key}: ${short(move.pin)} -> ${short(move.live)}`);
+  }
 }
 
 // ---------------------------------------------------------------- cli
@@ -1105,12 +1150,22 @@ async function main(argv) {
       const re = (name) => (option(args, name) ? new RegExp(option(args, name)) : undefined);
       const allow = re("--allow");
       if (!allow) throw new Error("--allow <regex> is required");
-      const problems = vetStaged(process.cwd(), { allow, pinsOnly: re("--pins-only"), plain: re("--plain"), jsonPins: re("--json-pins") });
+      const manifestPath = option(args, "--manifest");
+      const pinNames = manifestPath
+        ? new Set(
+            JSON.parse(readFileSync(manifestPath, "utf8"))
+              .standards.flatMap((st) => st.sources)
+              .flatMap((src) => (typeof src.pin === "object" ? [src.pin.constant] : [])),
+          )
+        : undefined;
+      const problems = vetStaged(process.cwd(), { allow, pinsOnly: re("--pins-only"), jsonPins: re("--json-pins"), pinNames });
       for (const p of problems) console.log(`- ${p}`);
       if (problems.length) process.exit(1);
       console.log("the staged change only touches allowed paths");
       return;
     }
+    case "apply-pins":
+      return applyPins(args[0], option(args, "--entry"));
     case "pr-body":
       writeFileSync(option(args, "--out") ?? "pr-body.md", cleanPrBody(readFileSync(args[0], "utf8")));
       return;
@@ -1137,7 +1192,7 @@ async function main(argv) {
       return;
     }
     default:
-      console.error("usage: spec-drift.mjs check|issues|health|context|vet-staged|pr-body|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
+      console.error("usage: spec-drift.mjs check|issues|health|context|apply-pins|vet-staged|pr-body|lockstep|page-text|page-digest ... (see the comment at the top of this file)");
       process.exit(2);
   }
 }

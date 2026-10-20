@@ -1,5 +1,6 @@
 {
   "$comment": "Generated from the spec_sources field in content/standards. Run `npm run pins` after changing one.",
+  "pin_file": "content/standards/{id}.md",
   "issue": {
     "title": "{name}: the spec changed since ax.guide last checked it",
     "impact": "The page at {page} describes the state that was read, so it may now say something the spec no longer does.",
