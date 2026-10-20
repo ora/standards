@@ -959,7 +959,7 @@ async function context(manifestPath, { titleFile, out }) {
 }
 
 // A pin line, by its name: a TypeScript constant or a YAML `pin:` field (ax.guide's front matter).
-const PIN_LINE = /^(?:export const ([A-Z][A-Z0-9_]*) = "[A-Za-z0-9._@:+/-]*";|\s+(pin): "[A-Za-z0-9._@:+/ -]*")$/;
+const PIN_LINE = /^(?:export const ([A-Z][A-Z0-9_]*) = "[A-Za-z0-9._@:+/-]*";|\s+(pin): "[A-Za-z0-9._@:+/ ()-]*")$/;
 
 /** git, with nothing in the checkout able to make it run a command. */
 function safeGit(cwd, args) {
@@ -1075,10 +1075,15 @@ const SECRET = /\b(sk-ant-[A-Za-z0-9_-]{8,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pa
 export function cleanPrBody(text) {
   if (SECRET.test(text)) throw new Error("the description holds something shaped like a secret");
   let body = text
+    // Characters a reader cannot see: Unicode tags, zero-width and direction controls, byte order marks.
+    .replace(/[\u{E0000}-\u{E007F}\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/gu, "")
     .replace(/<!--[\s\S]*?(-->|$)/g, "")
-    .replace(/^\s*\[[^\]]*\]:\s*#.*$/gm, "");
-  // "Fixes #12", "closes owner/repo#3", "resolves https://github.com/o/r/issues/4": GitHub acts on these when the pull request merges.
-  body = body.replace(/\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)\b(?=\s*:?\s+(?:[\w.-]+\/[\w.-]+)?#\d|\s*:?\s+https?:\/\/\S+\/(?:issues|pull)\/\d)/gi, "see");
+    // Link reference definitions render as nothing, so text in them is hidden.
+    .replace(/^\s{0,3}\[[^\]]+\]:.*$/gm, "")
+    // No raw HTML at all: `<` shows as text.
+    .replace(/</g, "&lt;");
+  // "Fixes #12", "**closes** owner/repo#3", "resolves: https://github.com/o/r/issues/4": GitHub acts on these when the pull request merges.
+  body = body.replace(/\b(close[sd]?|fix(?:e[sd])?|resolve[sd]?)\b(?=[\s:*_]*(?:[\w.-]+\/[\w.-]+)?#\d|[\s:*_]*https?:\/\/\S+\/(?:issues|pull)\/\d)/gi, "see");
   // A word joiner after @ keeps a handle readable and stops the mention.
   body = body.replace(/@(?=[A-Za-z0-9-])/g, "@\u2060");
   return body.length > 20_000 ? `${body.slice(0, 20_000)}\n\n[cut at 20,000 characters]\n` : body;
@@ -1094,25 +1099,53 @@ function applyPins(manifestPath, entryPath) {
   const entry = JSON.parse(readFileSync(entryPath, "utf8"));
   const standard = manifest.standards.find((s) => s.id === entry.id);
   if (!standard) throw new Error(`no standard ${entry.id} in ${manifestPath}`);
-  const replaceOnce = (file, from, to) => {
+  const before = new Map(manifest.standards.flatMap((st) => st.sources.map((src) => [`${st.id} ${sourceKey(src)}`, resolvePin(src.pin)])));
+  const replaceOnce = (file, from, to, within) => {
     const text = readFileSync(file, "utf8");
-    const count = text.split(from).length - 1;
+    const [start, end] = within ? within(text) : [0, text.length];
+    const region = text.slice(start, end);
+    const count = region.split(from).length - 1;
     if (count !== 1) throw new Error(`${file}: expected the pin exactly once, found it ${count} times`);
-    writeFileSync(file, text.replace(from, () => to));
+    writeFileSync(file, text.slice(0, start) + region.replace(from, () => to) + text.slice(end));
   };
+  // The manifest's own literal pins: search only this standard's entry, so a value two specs share cannot jam it.
+  const ownEntry = (text) => {
+    const start = text.indexOf(`"id": "${standard.id}"`);
+    if (start === -1) throw new Error(`cannot find the ${standard.id} entry in ${manifestPath}`);
+    const next = text.indexOf(`"id": "`, start + 1);
+    return [start, next === -1 ? text.length : next];
+  };
+  const expected = new Map(before);
   for (const move of entry.moved) {
     const src = standard.sources.find((s) => sourceKey(s) === move.key);
     if (!src) throw new Error(`${entry.id} has no source ${move.key}`);
     if (resolvePin(src.pin) !== move.pin) throw new Error(`${move.key}: the pin is no longer ${move.pin}`);
     if (!pinShapeOk(src.kind, move.live)) throw new Error(`${move.key}: the live value is not a valid ${src.kind} pin`);
+    if (src.kind === "git-dated-dirs") {
+      // A newer revision is adopted by a person: the snapshot date also moves code, docs and the watched folder.
+      console.log(`${move.key}: a newer revision ${move.live} exists; left for a person to adopt`);
+      continue;
+    }
     if (typeof src.pin === "object") {
       replaceOnce(src.pin.file, `${src.pin.constant} = "${move.pin}"`, `${src.pin.constant} = "${move.live}"`);
     } else if (manifest.pin_file) {
       replaceOnce(fill(manifest.pin_file, standard), `"${move.pin}"`, `"${move.live}"`);
     } else {
-      replaceOnce(manifestPath, `"pin": "${move.pin}"`, `"pin": "${move.live}"`);
+      replaceOnce(manifestPath, `"pin": "${move.pin}"`, `"pin": "${move.live}"`, ownEntry);
     }
+    expected.set(`${standard.id} ${move.key}`, move.live);
     console.log(`${move.key}: ${short(move.pin)} -> ${short(move.live)}`);
+  }
+  // Read every pin back (ax.guide's land in the page files, so they are read from the manifest again only
+  // where it holds them): only the moved ones changed, each to its live value.
+  if (!manifest.pin_file) {
+    const after = JSON.parse(readFileSync(manifestPath, "utf8"));
+    for (const st of after.standards) {
+      for (const src of st.sources) {
+        const key = `${st.id} ${sourceKey(src)}`;
+        if (resolvePin(src.pin) !== expected.get(key)) throw new Error(`${key}: the pin changed unexpectedly`);
+      }
+    }
   }
 }
 

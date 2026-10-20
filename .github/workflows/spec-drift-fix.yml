@@ -12,7 +12,7 @@ name: spec drift fix
 #   prepare  read-only, no secrets. Checks the issue was opened by the watch,
 #            then writes its body and what changed upstream to an artifact
 #            (`spec-drift.mjs context`).
-#   draft    only the Claude key: no GitHub token, no stored credentials, and
+#   draft    only the Claude key: no GitHub token, no git directory, and
 #            Claude Code limited to files inside the checkout (no shell, web,
 #            subagents, hooks or MCP). Its only output is the review.
 #   verify   no token, no Claude key. Moves the pins (`spec-drift.mjs
@@ -61,6 +61,7 @@ jobs:
       issues: read
     outputs:
       ready: ${{ steps.gate.outputs.ready }}
+      pack: ${{ steps.hash.outputs.pack }}
     steps:
       - name: Skip unless a Claude key is configured
         id: gate
@@ -97,6 +98,10 @@ jobs:
         if: steps.gate.outputs.ready == 'true'
         run: node scripts/spec-drift.mjs context spec-pins.json --title-file "$RUNNER_TEMP/pack/title.txt" --out "$RUNNER_TEMP/pack/changes"
 
+      - name: Record the pack's hash, so later jobs use exactly this pack
+        id: hash
+        if: steps.gate.outputs.ready == 'true'
+        run: echo "pack=$(cd "$RUNNER_TEMP/pack" && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         if: steps.gate.outputs.ready == 'true'
         with:
@@ -122,6 +127,8 @@ jobs:
         with:
           name: spec-drift-pack
           path: .spec-drift
+      - name: Leave the agent no git directory
+        run: rm -rf .git
       - name: Install Claude Code
         run: npm install --global --no-audit --no-fund "@anthropic-ai/claude-code@$CLAUDE_CODE_VERSION"
       - name: Review the change
@@ -177,13 +184,14 @@ jobs:
           retention-days: 7
 
   verify:
-    needs: draft
+    needs: [prepare, draft]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
     outputs:
       checks: ${{ steps.checks.outcome }}
+      changed: ${{ steps.pins.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -200,18 +208,29 @@ jobs:
         with:
           name: spec-drift-review
           path: ${{ runner.temp }}/review
+      - name: Check the pack is the one prepare wrote
+        env:
+          PACK: ${{ needs.prepare.outputs.pack }}
+        run: |
+          got=$(cd "$RUNNER_TEMP/pack" && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+          [ -n "$PACK" ] && [ "$got" = "$PACK" ] || { echo "the pack artifact changed after prepare"; exit 1; }
       - name: Move the pins, and have git confirm that is all that changed
+        id: pins
         run: |
           node scripts/spec-drift.mjs apply-pins spec-pins.json --entry "$RUNNER_TEMP/pack/changes/entry.json"
           npm ci
           npm run pins
           git add -u
+          # Nothing to move: only a newer revision, which a person adopts.
+          if git diff --cached --quiet; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
           node scripts/spec-drift.mjs vet-staged \
             --allow '^(content/standards/[a-z0-9-]+\.md|spec-pins\.json)$' \
               --pins-only '^content/standards/.+\.md$' \
               --json-pins '^spec-pins\.json$'
       - name: Run the checks
         id: checks
+        if: steps.pins.outputs.changed == 'true'
         continue-on-error: true
         run: |
           npm run typecheck && npm run lint && npm test
@@ -227,7 +246,7 @@ jobs:
           retention-days: 7
 
   propose:
-    needs: verify
+    needs: [prepare, verify]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -249,7 +268,27 @@ jobs:
         with:
           name: spec-drift-pack
           path: ${{ runner.temp }}/pack
+      - name: Check the pack is the one prepare wrote
+        env:
+          PACK: ${{ needs.prepare.outputs.pack }}
+        run: |
+          got=$(cd "$RUNNER_TEMP/pack" && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+          [ -n "$PACK" ] && [ "$got" = "$PACK" ] || { echo "the pack artifact changed after prepare"; exit 1; }
+      - name: Post the review on the issue when no pin moved
+        if: needs.verify.outputs.changed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp scripts/spec-drift.mjs "$RUNNER_TEMP/spec-drift.mjs"
+          node "$RUNNER_TEMP/spec-drift.mjs" pr-body "$RUNNER_TEMP/vetted/review.md" --out "$RUNNER_TEMP/review.md"
+          {
+            echo "No pin could move automatically: the spec has a newer dated revision, which a person adopts (move the snapshot, the watched folder and the code together). Claude's review of the change:"
+            echo
+            cat "$RUNNER_TEMP/review.md"
+          } > "$RUNNER_TEMP/comment.md"
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
       - name: Apply the change and check it again
+        if: needs.verify.outputs.changed == 'true'
         run: |
           # main's copy of the script, taken before anything is applied
           cp scripts/spec-drift.mjs "$RUNNER_TEMP/spec-drift.mjs"
@@ -260,6 +299,7 @@ jobs:
               --json-pins '^spec-pins\.json$'
           node "$RUNNER_TEMP/spec-drift.mjs" pr-body "$RUNNER_TEMP/vetted/review.md" --out "$RUNNER_TEMP/review.md"
       - name: Open the pull request
+        if: needs.verify.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           CHECKS: ${{ needs.verify.outputs.checks }}
