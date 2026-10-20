@@ -1,0 +1,178 @@
+{
+  "$comment": "Generated from the spec_sources field in content/standards. Run `npm run pins` after changing one.",
+  "issue": {
+    "title": "{name}: the spec changed since ax.guide last checked it",
+    "impact": "The page at {page} describes the state that was read, so it may now say something the spec no longer does.",
+    "todo": "Read what changed (the links below) and recheck `content/standards/{id}.md` against it. Fix any claim that moved. Then set each moved source's `pin` in the page's `spec_sources` to the live value listed here, and run `npm run pins`. Change `last_verified` only if you rechecked every claim on the page."
+  },
+  "standards": [
+    {
+      "id": "ard",
+      "name": "ARD",
+      "page": "https://ax.guide/standards/ard",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "ards-project/ard-spec",
+          "path": "spec",
+          "pin": "40151d4a76af2e266723f78d9142f54a89fb5dcf"
+        }
+      ]
+    },
+    {
+      "id": "ai-catalog",
+      "name": "ai-catalog",
+      "page": "https://ax.guide/standards/ai-catalog",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "Agent-Card/ai-catalog",
+          "path": "specification",
+          "pin": "e020b2db26f8f13e904a95e0e457457dd3da9efd"
+        }
+      ]
+    },
+    {
+      "id": "webmcp",
+      "name": "WebMCP",
+      "page": "https://ax.guide/standards/webmcp",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "webmachinelearning/webmcp",
+          "path": "index.bs",
+          "pin": "bd81b6d06c4d22bd15c14849030bbeb2fb14d9cd"
+        }
+      ]
+    },
+    {
+      "id": "nlweb",
+      "name": "NLWeb",
+      "page": "https://ax.guide/standards/nlweb",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "nlweb-ai/website",
+          "path": "NLWEBSPEC.md",
+          "pin": "b62cf132e689a0e7083b87fde8ff083a1d853b8e"
+        }
+      ]
+    },
+    {
+      "id": "web-bot-auth",
+      "name": "Web Bot Auth",
+      "page": "https://ax.guide/standards/web-bot-auth",
+      "sources": [
+        {
+          "kind": "ietf-draft",
+          "name": "draft-ietf-webbotauth-httpsig-protocol",
+          "pin": "00"
+        }
+      ]
+    },
+    {
+      "id": "poppy",
+      "name": "Poppy",
+      "page": "https://ax.guide/standards/poppy",
+      "sources": [
+        {
+          "kind": "page",
+          "url": "https://personalagentprotocol.org/docs/spec",
+          "pin": "1c12afb072eb6e9b3ef221132248a6d5be8f43ef863614cc4a8663fe25ab09d5"
+        },
+        {
+          "kind": "page",
+          "url": "https://personalagentprotocol.org/docs/extensions/operations",
+          "pin": "ce2bd8aca3f71832a50539f35f26227c81b4834099f97f1e05eb5838ca38184e"
+        },
+        {
+          "kind": "page",
+          "url": "https://personalagentprotocol.org/docs/guides",
+          "pin": "8b7ec9262ae7664f146f3945c8a5f165a39c575ed5931532dbc284d475f563b6"
+        }
+      ]
+    },
+    {
+      "id": "auth-md",
+      "name": "auth.md",
+      "page": "https://ax.guide/standards/auth-md",
+      "sources": [
+        {
+          "kind": "git-head",
+          "repo": "workos/auth.md",
+          "pin": "b53c9edfbfeea679b617727ebca9ba436bade794"
+        }
+      ]
+    },
+    {
+      "id": "ucp",
+      "name": "UCP",
+      "page": "https://ax.guide/standards/ucp",
+      "sources": [
+        {
+          "kind": "git-latest-tag",
+          "repo": "Universal-Commerce-Protocol/ucp",
+          "match": "^v\\d{4}-\\d{2}-\\d{2}$",
+          "pin": "v2026-08-25"
+        }
+      ]
+    },
+    {
+      "id": "acp",
+      "name": "ACP",
+      "page": "https://ax.guide/standards/acp",
+      "sources": [
+        {
+          "kind": "git-dated-dirs",
+          "repo": "agentic-commerce-protocol/agentic-commerce-protocol",
+          "path": "spec",
+          "pin": "2026-04-17"
+        },
+        {
+          "kind": "git-path",
+          "repo": "agentic-commerce-protocol/agentic-commerce-protocol",
+          "path": "spec/2026-04-17",
+          "pin": "f90eae69b2cb6e93746436ab8c81fbc356e398b6"
+        }
+      ]
+    },
+    {
+      "id": "ap2",
+      "name": "AP2",
+      "page": "https://ax.guide/standards/ap2",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "google-agentic-commerce/AP2",
+          "path": "docs/ap2/specification.md",
+          "pin": "80a6dd354d2062a512281e32df42b0233af27c8f"
+        }
+      ]
+    },
+    {
+      "id": "mpp",
+      "name": "MPP",
+      "page": "https://ax.guide/standards/mpp",
+      "sources": [
+        {
+          "kind": "ietf-draft",
+          "name": "draft-httpauth-payment",
+          "pin": "01"
+        }
+      ]
+    },
+    {
+      "id": "x402",
+      "name": "x402",
+      "page": "https://ax.guide/standards/x402",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "x402-foundation/x402",
+          "path": "specs",
+          "pin": "fd92aa2f26e0b20985479ef43ab54cb28b555cf2"
+        }
+      ]
+    }
+  ]
+}

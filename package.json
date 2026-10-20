@@ -22,7 +22,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "readme": "UPDATE_README=1 vitest run tests/readme.test.ts"
+    "readme": "UPDATE_README=1 vitest run tests/readme.test.ts",
+    "pins": "UPDATE_PINS=1 vitest run tests/spec-pins.test.ts"
   },
   "dependencies": {
     "marked": "18.1.0",

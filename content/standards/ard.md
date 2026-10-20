@@ -23,6 +23,11 @@ related:
   - id: ai-catalog
     note: Its predecessor, now the publishing format. ARD is the discovery format. Serve the same file at both addresses.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-path
+    repo: ards-project/ard-spec
+    path: spec
+    pin: "40151d4a76af2e266723f78d9142f54a89fb5dcf"
 ---
 
 ## How it works

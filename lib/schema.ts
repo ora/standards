@@ -14,6 +14,45 @@ export const STANDARD_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const text = z.string().trim().min(1);
 const url = z.url({ protocol: /^https?$/ });
 
+const repo = z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/, "a GitHub repository as owner/name");
+const repoPath = z.string().regex(/^[^-\s/][^\s]*$/, "a path inside the repository, without a leading slash");
+const gitSha = z.string().regex(/^[0-9a-f]{40}$/, "a full 40-character Git SHA");
+
+/**
+ * One place a spec lives, and the exact state of it someone last read (`pin`).
+ * The weekly spec drift check (scripts/spec-drift.mjs) compares the live
+ * state with the pin and opens an issue when they differ.
+ */
+export const specSource = z.discriminatedUnion("kind", [
+  /** A file (its blob SHA) or a folder (its tree SHA) on the default branch. */
+  z.strictObject({ kind: z.literal("git-path"), repo, path: repoPath, pin: gitSha }),
+  /** The default branch's head commit: any change anywhere in the repository. */
+  z.strictObject({ kind: z.literal("git-head"), repo, pin: gitSha }),
+  /** The newest dated revision folder under `path`, such as spec/2026-04-17. */
+  z.strictObject({ kind: z.literal("git-dated-dirs"), repo, path: repoPath, pin: z.iso.date() }),
+  /** The newest tag matching `match` (anchored with ^ and $), in version order. */
+  z.strictObject({
+    kind: z.literal("git-latest-tag"),
+    repo,
+    match: z.string().regex(/^\^.+\$$/, "a regular expression anchored with ^ and $"),
+    pin: text.max(100),
+  }),
+  /** An IETF draft's latest revision, plus its state once it is no longer Active ("01 Expired"). */
+  z.strictObject({
+    kind: z.literal("ietf-draft"),
+    name: z.string().regex(/^draft-[a-z0-9-]+$/, "a draft name such as draft-ietf-x-y"),
+    pin: z.string().regex(/^\d{2}(?: [A-Za-z][A-Za-z ()-]{0,40})?$/, 'a revision such as "01", quoted'),
+  }),
+  /** A spec that is only a web page: SHA-256 of its normalized article text. */
+  z.strictObject({
+    kind: z.literal("page"),
+    url: z.url({ protocol: /^https$/ }),
+    pin: z.string().regex(/^[0-9a-f]{64}$/, "a 64-character SHA-256 digest"),
+  }),
+]);
+
+export type SpecSource = z.infer<typeof specSource>;
+
 /** The front matter of one content/standards/<id>.md file. */
 export const standardFrontMatter = z.strictObject({
   /** The short name people use, such as "UCP". */
@@ -44,6 +83,8 @@ export const standardFrontMatter = z.strictObject({
   related: z.array(z.strictObject({ id: z.string().regex(STANDARD_ID), note: text })).default([]),
   /** The day someone last checked every claim against its sources (YYYY-MM-DD). */
   last_verified: z.iso.date(),
+  /** Where the spec lives and the state last read, so a weekly check can flag changes. */
+  spec_sources: z.array(specSource).min(1),
 });
 
 export type StandardFrontMatter = z.infer<typeof standardFrontMatter>;

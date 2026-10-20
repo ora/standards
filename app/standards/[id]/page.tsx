@@ -6,6 +6,7 @@ import { StandardTile } from "@/components/standard-tile";
 import { StatusBadge } from "@/components/status-badge";
 import { content, editHref, formatDate } from "@/lib/content";
 import { renderInline, renderMarkdown } from "@/lib/markdown";
+import { getSpecDrift } from "@/lib/spec-drift";
 import { daysSince, getJob, getStandard, getStandards } from "@/lib/standards";
 import "../standard.css";
 
@@ -13,6 +14,9 @@ type Props = { params: Promise<{ id: string }> };
 
 // Every standard is a file, so every page is made at build time.
 export const dynamicParams = false;
+// Made again at most hourly (SPEC_DRIFT_REVALIDATE), to pick up the spec
+// drift status and keep the "out of date" mark current between deploys.
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return getStandards().map((standard) => ({ id: standard.id }));
@@ -42,6 +46,7 @@ export default async function StandardPage({ params }: Props) {
     return target ? [{ ...r, standard: target }] : [];
   });
   const stale = daysSince(standard.last_verified) > content.staleAfterDays;
+  const drift = await getSpecDrift(standard.id);
   const file = `content/standards/${standard.id}.md`;
 
   return (
@@ -117,10 +122,19 @@ export default async function StandardPage({ params }: Props) {
 
             <footer className="verified">
               <p>
-                {stale && <strong className="verified__stale">May be out of date. </strong>}
+                {drift ? (
+                  <strong className="verified__stale">{content.specDrift.changed} </strong>
+                ) : (
+                  stale && <strong className="verified__stale">May be out of date. </strong>
+                )}
                 Last checked against its sources on{" "}
-                <time dateTime={standard.last_verified}>{formatDate(standard.last_verified)}</time>. These standards
-                move fast; if something changed, please help.
+                <time dateTime={standard.last_verified}>{formatDate(standard.last_verified)}</time>.{" "}
+                {drift?.issue && (
+                  <>
+                    <a href={drift.issue}>{content.specDrift.seeChange}</a>.{" "}
+                  </>
+                )}
+                These standards move fast; if something changed, please help.
               </p>
               <p className="verified__actions">
                 <a href={editHref(file)} className="button">

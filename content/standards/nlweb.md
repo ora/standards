@@ -28,6 +28,11 @@ related:
   - id: ai-catalog
     note: An AI catalog (or ARD file) can list your NLWeb endpoint.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-path
+    repo: nlweb-ai/website
+    path: NLWEBSPEC.md
+    pin: "b62cf132e689a0e7083b87fde8ff083a1d853b8e"
 ---
 
 ## How it works

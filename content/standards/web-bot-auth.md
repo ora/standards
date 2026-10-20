@@ -24,6 +24,10 @@ related:
   - id: x402
     note: Cloudflare plans to use them together for pay-per-crawl.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: ietf-draft
+    name: draft-ietf-webbotauth-httpsig-protocol
+    pin: "00"
 ---
 
 ## How it works

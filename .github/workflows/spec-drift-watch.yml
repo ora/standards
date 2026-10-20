@@ -1,0 +1,83 @@
+name: spec drift watch
+
+# Once a week, checks every standard's spec against the state last read for
+# it (the pins in spec-pins.json, generated from `spec_sources` in
+# content/standards). For each standard whose spec changed, it opens or
+# refreshes one issue that links what changed; it closes the issue once the
+# pins are moved. It also publishes a small status file to the
+# `spec-drift-status` branch, which the standard pages read to show "The spec
+# changed after this check."
+#
+# The check itself is scripts/spec-drift.mjs, shared byte for byte with Ora's
+# watcher (eralabs-ai/ora). It needs no npm install. Upstream content never
+# reaches a shell: the script runs git and gh with argument arrays, and only
+# hashes, revision names and digests reach the issues.
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write # push the status file to the spec-drift-status branch only
+  issues: write
+
+concurrency:
+  group: spec-drift-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      STATUS_BRANCH: spec-drift-status
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Read the last published status
+        run: |
+          # The branch is missing until the first run publishes it.
+          if git ls-remote --exit-code --heads origin "$STATUS_BRANCH" >/dev/null; then
+            git fetch --depth 1 origin "+refs/heads/$STATUS_BRANCH:refs/remotes/origin/$STATUS_BRANCH"
+            git show "origin/$STATUS_BRANCH:spec-drift.json" > "$RUNNER_TEMP/status-in.json"
+          fi
+
+      - name: Compare every spec with its pins
+        id: check
+        continue-on-error: true
+        run: node scripts/spec-drift.mjs check spec-pins.json --out "$RUNNER_TEMP/report.json"
+
+      - name: Open, refresh or close the drift issues
+        run: |
+          node scripts/spec-drift.mjs issues "$RUNNER_TEMP/report.json" --repo "$GITHUB_REPOSITORY" \
+            --status-in "$RUNNER_TEMP/status-in.json" --status-out "$RUNNER_TEMP/status-out.json"
+
+      - name: Publish the status for the site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir="$RUNNER_TEMP/status-branch"
+          if git rev-parse --verify --quiet "origin/$STATUS_BRANCH" >/dev/null; then
+            git worktree add --detach "$dir" "origin/$STATUS_BRANCH"
+          else
+            git worktree add --orphan -b "$STATUS_BRANCH" "$dir"
+          fi
+          cp "$RUNNER_TEMP/status-out.json" "$dir/spec-drift.json"
+          git -C "$dir" add spec-drift.json
+          if git -C "$dir" diff --cached --quiet; then
+            echo "status unchanged"
+            exit 0
+          fi
+          git -C "$dir" commit --quiet -m "chore: update spec drift status"
+          git -C "$dir" push origin "HEAD:refs/heads/$STATUS_BRANCH"
+
+      - name: Fail when a spec could not be read
+        if: steps.check.outcome == 'failure'
+        run: |
+          echo "At least one spec source could not be read; see the check step. Its issue was left as it was."
+          exit 1

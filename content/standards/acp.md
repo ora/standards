@@ -25,6 +25,15 @@ related:
   - id: x402
     note: Payment rails like MPP and x402 can sit underneath.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-dated-dirs
+    repo: agentic-commerce-protocol/agentic-commerce-protocol
+    path: spec
+    pin: "2026-04-17"
+  - kind: git-path
+    repo: agentic-commerce-protocol/agentic-commerce-protocol
+    path: spec/2026-04-17
+    pin: "f90eae69b2cb6e93746436ab8c81fbc356e398b6"
 ---
 
 ## How it works

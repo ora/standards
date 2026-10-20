@@ -34,6 +34,11 @@ links:
   - label: Spec
     url: https://example.com/spec
 last_verified: "2026-10-11"
+spec_sources:
+  - kind: git-path
+    repo: example/spec
+    path: spec.md
+    pin: "0123456789abcdef0123456789abcdef01234567"
 ---
 
 Body.
@@ -78,6 +83,10 @@ describe("content/standards", () => {
     );
     expect(() => parseStandard("test", VALID.replace("url: https://example.com/spec", "url: not a url"))).toThrow(/url/);
     expect(() => parseStandard("test", VALID.replace("name: Test", "name: Test\nnickname: T"))).toThrow(/nickname/);
+    expect(() => parseStandard("test", VALID.replace("0123456789abcdef0123456789abcdef01234567", "abc123"))).toThrow(
+      /40-character[\s\S]*spec_sources\[0\]\.pin/,
+    );
+    expect(() => parseStandard("test", VALID.replace("kind: git-path", "kind: ftp"))).toThrow(/spec_sources/);
     expect(() => parseStandard("test", "no front matter")).toThrow(/front matter/);
     expect(() => parseStandard("Bad_Name", VALID)).toThrow(/lowercase/);
   });

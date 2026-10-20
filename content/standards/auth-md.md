@@ -24,6 +24,10 @@ related:
   - id: web-bot-auth
     note: Web Bot Auth proves which bot is asking. auth.md creates the account it acts for.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-head
+    repo: workos/auth.md
+    pin: "b53c9edfbfeea679b617727ebca9ba436bade794"
 ---
 
 ## How it works
