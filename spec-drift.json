@@ -22,9 +22,7 @@
       "changed": false
     },
     "poppy": {
-      "changed": true,
-      "issue": "https://github.com/ora/standards/issues/10",
-      "since": "2026-10-20"
+      "changed": false
     },
     "ucp": {
       "changed": false
