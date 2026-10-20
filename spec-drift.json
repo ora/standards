@@ -1,0 +1,42 @@
+{
+  "standards": {
+    "acp": {
+      "changed": false
+    },
+    "ai-catalog": {
+      "changed": false
+    },
+    "ap2": {
+      "changed": false
+    },
+    "ard": {
+      "changed": false
+    },
+    "auth-md": {
+      "changed": false
+    },
+    "mpp": {
+      "changed": false
+    },
+    "nlweb": {
+      "changed": false
+    },
+    "poppy": {
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/10",
+      "since": "2026-10-20"
+    },
+    "ucp": {
+      "changed": false
+    },
+    "web-bot-auth": {
+      "changed": false
+    },
+    "webmcp": {
+      "changed": false
+    },
+    "x402": {
+      "changed": false
+    }
+  }
+}
