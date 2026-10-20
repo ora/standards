@@ -53,9 +53,14 @@
   "repo": {
     "url": "https://github.com/ora/standards",
     "branch": "main",
-    "newIssueUrl": "https://github.com/ora/standards/issues/new"
+    "newIssueUrl": "https://github.com/ora/standards/issues/new",
+    "specDriftStatusUrl": "https://raw.githubusercontent.com/ora/standards/spec-drift-status/spec-drift.json"
   },
   "staleAfterDays": 90,
+  "specDrift": {
+    "changed": "The spec changed after this check.",
+    "seeChange": "See what changed"
+  },
   "footer": {
     "about": "The Agentic-Web Cheatsheet: an open, community-edited guide. Every page is a file in a public repository, so anyone can fix a sentence or add a standard with a pull request.",
     "maintainedBy": {

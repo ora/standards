@@ -27,6 +27,11 @@ related:
   - id: mpp
     note: Another way to actually move the money.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-path
+    repo: google-agentic-commerce/AP2
+    path: docs/ap2/specification.md
+    pin: "80a6dd354d2062a512281e32df42b0233af27c8f"
 ---
 
 ## How it works

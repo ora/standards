@@ -9,7 +9,7 @@ By taking part you agree to follow the [code of conduct](CODE_OF_CONDUCT.md).
 | You want to | Do this |
 | --- | --- |
 | Fix a wrong sentence or a stale status | Press **Edit on GitHub** at the foot of the standard's page, change the line, link your source, open a pull request. |
-| Re-check a page | Check every claim against its sources, fix what changed, update `last_verified`. |
+| Re-check a page | Check every claim against its sources, fix what changed, update `last_verified`. If the spec itself changed, move its pins too (see [Spec sources](#spec-sources)). |
 | Add a standard | Copy [`content/standards/_template.md`](content/standards/_template.md) to `content/standards/<id>.md` and fill it in. |
 | Report a problem without fixing it | [Report an error](https://github.com/ora/standards/issues/new?template=correction.yml). |
 | Suggest a standard without writing it | [Suggest a standard](https://github.com/ora/standards/issues/new?template=new-standard.yml). |
@@ -44,6 +44,18 @@ A partner list is not adoption, and a transaction count is not commerce. If a nu
 - Put the spec first in `links`.
 - Change `last_verified` only when you have rechecked **every** claim on the page.
 
+## Spec sources
+
+Every standard lists where its spec lives in `spec_sources`, with a `pin`: the exact state of the spec that was read (a Git SHA, a release tag, a draft revision, or a digest of a page's text). Once a week a check ([`scripts/spec-drift.mjs`](scripts/spec-drift.mjs), run by [`spec-drift-watch.yml`](.github/workflows/spec-drift-watch.yml)) compares each spec with its pins. When one changed, it opens an issue that links what changed, and the standard's page says "The spec changed after this check" until the pins move. The template lists the kinds of source.
+
+When you handle one of those issues:
+
+1. Read what changed and recheck the page against it.
+2. Set each moved `pin` to the live value the issue lists, even when nothing on the page needed to change: moving a pin is the record that someone read the change.
+3. Run `npm run pins`. It regenerates [`spec-pins.json`](spec-pins.json), which the check reads, and the tests fail until it matches the content files.
+
+To see the live state yourself, run `node scripts/spec-drift.mjs check spec-pins.json --only <id>`. It needs Node and Git, no install. [Ora](https://ora.ai) reads `spec-pins.json` too and compares it with the pins behind its own checks, so tell us in the pull request if a change looks like it should change how sites are scored.
+
 ## House style
 
 - Plain words and short sentences. Explain a term the first time it appears.
@@ -75,7 +87,7 @@ npm test
 npm run build
 ```
 
-If you added a standard or changed a name or a `phrase`, run `npm run readme` too: it regenerates the table of standards in the README, and the tests fail until it matches.
+If you added a standard or changed a name or a `phrase`, run `npm run readme` too: it regenerates the table of standards in the README, and the tests fail until it matches. If you changed `spec_sources`, run `npm run pins` for the same reason.
 
 ## License of contributions
 

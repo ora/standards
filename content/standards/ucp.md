@@ -27,6 +27,11 @@ related:
   - id: poppy
     note: May overlap with UCP on sign-in.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: git-latest-tag
+    repo: Universal-Commerce-Protocol/ucp
+    match: ^v\d{4}-\d{2}-\d{2}$
+    pin: "v2026-08-25"
 ---
 
 ## How it works

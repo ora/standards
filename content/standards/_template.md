@@ -37,6 +37,22 @@ related:
     note: How the two relate, in one sentence.
 # The day you checked every claim on this page against its sources.
 last_verified: "2027-01-01"
+# Where the spec lives, so a weekly check can tell you when it changes. Each
+# pin is the exact state you read: the check opens an issue when the live
+# spec no longer matches it. Kinds (see scripts/spec-drift.mjs):
+#   git-path        repo + path: a file or folder in a Git repository
+#   git-head        repo: any change anywhere in a small, spec-only repository
+#   git-dated-dirs  repo + path: a newer dated revision folder, such as spec/2026-04-17
+#   git-latest-tag  repo + match: a newer release tag
+#   ietf-draft      name: a new revision of an IETF draft
+#   page            url: a spec that is only a web page
+# Get the pin of a new source by running `node scripts/spec-drift.mjs check
+# spec-pins.json --only <id>` with any placeholder pin, and copy the live value.
+spec_sources:
+  - kind: git-path
+    repo: example/spec
+    path: spec.md
+    pin: "0000000000000000000000000000000000000000"
 ---
 
 ## How it works

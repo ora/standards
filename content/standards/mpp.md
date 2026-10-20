@@ -23,6 +23,10 @@ related:
   - id: ap2
     note: AP2 records what a person approved; MPP moves the money.
 last_verified: "2026-10-19"
+spec_sources:
+  - kind: ietf-draft
+    name: draft-httpauth-payment
+    pin: "01"
 ---
 
 ## How it works
