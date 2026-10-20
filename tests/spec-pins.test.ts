@@ -24,4 +24,11 @@ describe(SPEC_PINS_FILE, () => {
       expect(new Set(keys).size, `${standard.id} lists a spec source twice`).toBe(keys.length);
     }
   });
+
+  it("passes the drift script's own manifest check, so the weekly run cannot reject it", async () => {
+    // A path the type checker does not follow: the script is plain JavaScript with no types.
+    const script = join(process.cwd(), "scripts", "spec-drift.mjs");
+    const { validateManifest } = await import(script);
+    expect(validateManifest(JSON.parse(readFileSync(FILE, "utf8")))).toEqual([]);
+  });
 });

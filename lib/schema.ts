@@ -16,6 +16,16 @@ const url = z.url({ protocol: /^https?$/ });
 
 const repo = z.string().regex(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/, "a GitHub repository as owner/name");
 const repoPath = z.string().regex(/^[^-\s/][^\s]*$/, "a path inside the repository, without a leading slash");
+function isRegExp(source: string): boolean {
+  try {
+    new RegExp(source);
+    return true;
+  } catch {
+    // RegExp throws SyntaxError on an invalid pattern, which is exactly what this answers.
+    return false;
+  }
+}
+
 const gitSha = z.string().regex(/^[0-9a-f]{40}$/, "a full 40-character Git SHA");
 
 /**
@@ -34,7 +44,10 @@ export const specSource = z.discriminatedUnion("kind", [
   z.strictObject({
     kind: z.literal("git-latest-tag"),
     repo,
-    match: z.string().regex(/^\^.+\$$/, "a regular expression anchored with ^ and $"),
+    match: z
+      .string()
+      .regex(/^\^.+\$$/, "a regular expression anchored with ^ and $")
+      .refine(isRegExp, "a valid regular expression"),
     pin: text.max(100),
   }),
   /** An IETF draft's latest revision, plus its state once it is no longer Active ("01 Expired"). */

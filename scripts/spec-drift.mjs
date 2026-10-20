@@ -35,10 +35,9 @@
  *
  * Manifest (JSON):
  *   {
- *     "issue": { "title": "...", "impact": "...", "todo": "..." },   // defaults; {id} {name} {version} {page} are filled in
+ *     "issue": { "title": "...", "impact": "...", "todo": "..." },   // defaults; {id} {name} {page} are filled in
  *     "standards": [
- *       { "id": "webmcp", "name": "WebMCP", "version": "...", "read_on": "YYYY-MM-DD",
- *         "page": "https://...", "peer": "<id in the peer's pins>",
+ *       { "id": "webmcp", "name": "WebMCP", "page": "https://...", "peer": "<id in the peer's pins>",
  *         "issue": { ...per-spec overrides },
  *         "sources": [ { "kind": "git-path", "repo": "owner/name", "path": "index.bs",
  *                        "pin": "<sha>" | { "file": "src/x.ts", "constant": "X_PIN" } } ] }
@@ -172,7 +171,7 @@ export function pageDigest(html) {
 // ---------------------------------------------------------------- manifest
 
 function fill(template, standard) {
-  return String(template ?? "").replace(/\{(id|name|version|page|read_on)\}/g, (_, key) => standard[key] ?? "");
+  return String(template ?? "").replace(/\{(id|name|page)\}/g, (_, key) => standard[key] ?? "");
 }
 
 /** Where a source lives, as one comparable string: the same key in two manifests means the same thing is watched. */
@@ -575,8 +574,9 @@ function issues(reportPath, { repo, label = "spec-drift", statusIn, statusOut })
           if (!labelReady) {
             try {
               gh(["label", "create", label, "--repo", repo, "--color", "D93F0B", "--description", "A watched spec changed since its last review"]);
-            } catch {
-              // Expected when the label already exists; issue create below fails loudly if it truly cannot be used.
+            } catch (error) {
+              // The label usually exists already; anything else is a real failure.
+              if (!/already exists/i.test(String(error?.stderr ?? ""))) throw error;
             }
             labelReady = true;
           }
@@ -637,6 +637,10 @@ export function compareWithPeer(manifest, peerPins, { live = new Map(), sameScri
     }
     claimed.add(peerId);
     const peerSources = new Map(peer.sources.map((s) => [sourceKey(s), s]));
+    const ourKeys = new Set(standard.sources.map(sourceKey));
+    for (const theirs of peer.sources) {
+      if (!ourKeys.has(sourceKey(theirs))) problems.push(`**${standard.name}**: ${peerName} also watches ${describeSource(theirs)}, and this repo does not.`);
+    }
     for (const src of standard.sources) {
       const key = sourceKey(src);
       const theirs = peerSources.get(key);
