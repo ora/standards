@@ -35,5 +35,14 @@
       { "id": "auth-md", "says": "Sign up a new user." },
       { "id": "poppy", "says": "Act for an existing customer." }
     ]
+  },
+  {
+    "id": "poppy-vs-pact",
+    "title": "Poppy vs PACT",
+    "summary": "Its own protocol from Sierra and Meta vs. a layer on A2A from Decagon.",
+    "sides": [
+      { "id": "poppy", "says": "One file names your website, APIs and agent; the agent signs in to your company as the customer." },
+      { "id": "pact", "says": "The agent messages your support agent over A2A, with optional sign-in and permissions." }
+    ]
   }
 ]

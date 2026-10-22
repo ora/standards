@@ -32,6 +32,8 @@ related:
     note: Poppy signs in existing customers. auth.md signs up new ones.
   - id: ucp
     note: Poppy leaves shopping to UCP and ACP, and may overlap with UCP on sign-in.
+  - id: pact
+    note: PACT, from Decagon, also lets an agent act for a customer, as a layer on A2A rather than its own protocol.
   - id: ap2
     note: Payments are not covered yet. Until they are, payment consent needs another protocol, such as AP2.
 last_verified: "2026-10-19"

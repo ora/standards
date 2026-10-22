@@ -106,6 +106,19 @@
       ]
     },
     {
+      "id": "pact",
+      "name": "PACT",
+      "page": "https://ax.guide/standards/pact",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "openpactprotocol/openpactprotocol",
+          "path": "docs/spec.md",
+          "pin": "294e4bd6af29fbd64fcec64200d52ac449b8e659"
+        }
+      ]
+    },
+    {
       "id": "ucp",
       "name": "UCP",
       "page": "https://ax.guide/standards/ucp",
