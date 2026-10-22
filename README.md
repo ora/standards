@@ -36,11 +36,12 @@ Read it left to right as an agent's visit: find what's offered, use the site, pr
 | 05 | **[Web Bot Auth](https://ax.guide/standards/web-bot-auth)** | Identity | Cryptographic ID for bots |
 | 06 | **[Poppy](https://ax.guide/standards/poppy)**<br>Personal Agent Protocol (PAP) | Identity | Your agent signs in to a company as you |
 | 07 | **[auth.md](https://ax.guide/standards/auth-md)** | Identity | Your agent signs you up for a new service |
-| 08 | **[UCP](https://ax.guide/standards/ucp)**<br>Universal Commerce Protocol | Shop | A shared language for agent shopping |
-| 09 | **[ACP](https://ax.guide/standards/acp)**<br>Agentic Commerce Protocol | Shop | Products (and checkout) into ChatGPT |
-| 10 | **[AP2](https://ax.guide/standards/ap2)**<br>Agent Payments Protocol | Pay | Signed proof of what you authorized |
-| 11 | **[MPP](https://ax.guide/standards/mpp)**<br>Machine Payments Protocol | Pay | Pay inside a web request, card or crypto |
-| 12 | **[x402](https://ax.guide/standards/x402)** | Pay | Cents-per-request payments over HTTP 402 |
+| 08 | **[PACT](https://ax.guide/standards/pact)**<br>Personal Agent Consent & Trust Protocol | Identity | Your agent talks to a company's support agent for you |
+| 09 | **[UCP](https://ax.guide/standards/ucp)**<br>Universal Commerce Protocol | Shop | A shared language for agent shopping |
+| 10 | **[ACP](https://ax.guide/standards/acp)**<br>Agentic Commerce Protocol | Shop | Products (and checkout) into ChatGPT |
+| 11 | **[AP2](https://ax.guide/standards/ap2)**<br>Agent Payments Protocol | Pay | Signed proof of what you authorized |
+| 12 | **[MPP](https://ax.guide/standards/mpp)**<br>Machine Payments Protocol | Pay | Pay inside a web request, card or crypto |
+| 13 | **[x402](https://ax.guide/standards/x402)** | Pay | Cents-per-request payments over HTTP 402 |
 <!-- standards:end -->
 
 Each page has a one-line picture of the standard, a **reality check**, how it works, who's behind it, primary sources, the standards it's often confused with, and the date someone last checked it. The site also has a [side-by-side comparison](https://ax.guide/compare) and a [which-one-do-I-need guide](https://ax.guide/which).
