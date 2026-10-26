@@ -10,7 +10,9 @@
       "changed": false
     },
     "ard": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/16",
+      "since": "2026-10-26"
     },
     "auth-md": {
       "changed": false
@@ -22,7 +24,9 @@
       "changed": false
     },
     "poppy": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/18",
+      "since": "2026-10-26"
     },
     "ucp": {
       "changed": false
@@ -31,10 +35,14 @@
       "changed": false
     },
     "webmcp": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/17",
+      "since": "2026-10-26"
     },
     "x402": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/19",
+      "since": "2026-10-26"
     }
   }
 }
