@@ -7,7 +7,7 @@
     { "situation": "You have lots of structured content people and agents want to query", "standards": ["nlweb"] },
     { "situation": "Your bot visits other sites, or you need to verify bots on yours", "standards": ["web-bot-auth"] },
     { "situation": "You want agents to create accounts on your service without a sign-up form", "standards": ["auth-md"] },
-    { "situation": "Customers' own agents should sign in and act on their accounts", "standards": ["poppy"], "note": "Track it; Draft 0.1 is from October 9, 2026, and 0.2 is in progress." },
+    { "situation": "Customers' own agents should sign in and act on their accounts", "standards": ["poppy"], "note": "Track it; Draft 0.2 is from October 24, 2026, and 0.3 is in progress." },
     { "situation": "You sell goods and want any AI assistant to browse, cart and check out", "standards": ["ucp"] },
     { "situation": "You want your products shown in ChatGPT", "standards": ["acp"] },
     { "situation": "An agent pays and you need proof a person approved those exact terms", "standards": ["ap2"] },
