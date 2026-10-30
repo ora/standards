@@ -64,7 +64,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) first: it covers the status rules
 
 ## How it's built
 
-A small [Next.js](https://nextjs.org) app with no backend, no database and no tracking. Every page is static, built from the files in [`content/`](content/).
+A small [Next.js](https://nextjs.org) app with no tracking. Every page of the guide is static, built from the files in [`content/`](content/). The one exception is the [quiz](https://ax.guide/play): its open deck plays in the browser, while sign-in, the expert deck and the leaderboard run on [Supabase](https://supabase.com). Without Supabase keys the site still builds, and the open quiz still plays. See [`content/quiz/README.md`](content/quiz/README.md).
 
 ```
 content/
@@ -74,9 +74,12 @@ content/
   pairs.json               the pairs people mix up (/compare)
   guide.json               which one do I need (/which)
   home.json, site.json     page text: titles, nav, footer, status labels
+  quiz/open.json           the quiz's open deck (the expert deck is kept out of the repo)
   contribute.md            the /contribute page
 lib/schema.ts              the rules every standard's front matter must follow
 lib/standards.ts           reads, checks and numbers the standards
+lib/quiz*.ts               the quiz: cards, scoring, dealing, expert runs
+supabase/migrations/       the quiz's database: players, the expert deck, runs
 app/                       pages and share images (Next.js App Router)
 components/                small presentational components
 tests/                     checks every content file and this README's table
@@ -101,6 +104,7 @@ npm run dev          # http://localhost:3000
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
 | `npm run readme` | Regenerate the table of standards in this README |
+| `npm run quiz:sql` | Check `private/quiz-expert.json` and write the SQL that loads it into Supabase |
 
 ### Deploy
 

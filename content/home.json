@@ -41,6 +41,11 @@
         "href": "/which"
       },
       {
+        "title": "Test yourself",
+        "body": "Twelve cards, twenty seconds each. Then share your score.",
+        "href": "/play"
+      },
+      {
         "title": "Fix or add a standard",
         "body": "Every page is a file. Open a pull request.",
         "href": "/contribute"
