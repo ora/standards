@@ -27,14 +27,14 @@
     "prompt": "A restaurant lists its booking tool and its jobs tool in one JSON file, like a table of contents for AI. Which standard?",
     "options": ["ai-catalog", "NLWeb", "UCP", "auth.md"],
     "answer": 0,
-    "explain": "ai-catalog is one JSON list at /.well-known/ai-catalog.json. Like a table of contents, it doesn't hold the tools themselves; each entry says what kind of thing it is and where to find its full description.",
+    "explain": "ai-catalog is one JSON list at /.well-known/ai-catalog.json. Like a table of contents, it doesn't hold the tools themselves; each entry says what kind of thing it is and links to its full description or includes it.",
     "standard": "ai-catalog",
     "source": "https://ai-catalog.io/",
     "checked": "2026-10-30"
   },
   {
     "id": "o-ai-catalog-still-serve",
-    "kind": "real",
+    "kind": "quick",
     "prompt": "ARD calls ai-catalog its predecessor. True or false: it still pays to serve ai-catalog.json.",
     "options": ["True", "False"],
     "answer": 0,
@@ -133,7 +133,7 @@
   },
   {
     "id": "o-card-networks-web-bot-auth",
-    "kind": "real",
+    "kind": "quick",
     "prompt": "True or false: Visa's Trusted Agent Protocol and Mastercard's Agent Pay build on Web Bot Auth.",
     "options": ["True", "False"],
     "answer": 0,
@@ -189,7 +189,7 @@
   {
     "id": "o-poppy-fake-pairing",
     "kind": "fake",
-    "prompt": "Spot the fake: which standard is paired with the wrong launch partners?",
+    "prompt": "Spot the fake: which standard is paired with the wrong creators?",
     "options": ["Poppy: Google + Visa", "UCP: Google + Shopify", "ACP: OpenAI + Stripe", "MPP: Stripe + Tempo"],
     "answer": 0,
     "explain": "Poppy came from Sierra and Meta, announced October 6, 2026. The rest are right: Google and Shopify launched UCP, OpenAI and Stripe launched ACP, and Stripe and Tempo launched MPP.",
@@ -277,10 +277,10 @@
   {
     "id": "o-mpp-which",
     "kind": "which",
-    "prompt": "A research agent pays a fraction of a cent per article by card through Stripe, then settles the total when it finishes. Which standard?",
+    "prompt": "A research agent opens a pay-as-you-go \"session\" on Tempo, pays a fraction of a cent per article, and settles the total when it finishes. Which standard?",
     "options": ["AP2", "ACP", "x402", "MPP"],
     "answer": 3,
-    "explain": "MPP, from Stripe and Tempo, uses HTTP 402 like x402 but adds cards via Stripe, subscriptions and pay-as-you-go \"sessions.\" x402 is per-request stablecoin payments under a neutral foundation.",
+    "explain": "MPP, from Stripe and Tempo, answers with HTTP 402 like x402 but adds pay-as-you-go \"sessions\" and subscriptions. Sessions run on stablecoin rails like Tempo; cards through Stripe cover one-off charges.",
     "standard": "mpp",
     "source": "https://mpp.dev/",
     "checked": "2026-10-30"
@@ -351,7 +351,7 @@
   },
   {
     "id": "o-robots-txt-request",
-    "kind": "real",
+    "kind": "quick",
     "prompt": "True or false: robots.txt rules are a polite request, not a lock.",
     "options": ["True", "False"],
     "answer": 0,
