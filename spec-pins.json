@@ -16,7 +16,7 @@
           "kind": "git-path",
           "repo": "ards-project/ard-spec",
           "path": "spec",
-          "pin": "40151d4a76af2e266723f78d9142f54a89fb5dcf"
+          "pin": "eca2857d0c9b7b27aa2fb72fe3bb69fcd0d18ea9"
         }
       ]
     },
@@ -29,7 +29,7 @@
           "kind": "git-path",
           "repo": "Agent-Card/ai-catalog",
           "path": "specification",
-          "pin": "e020b2db26f8f13e904a95e0e457457dd3da9efd"
+          "pin": "7ee97d9655a13e1f6442ab505982c03db17134ea"
         }
       ]
     },
@@ -42,7 +42,7 @@
           "kind": "git-path",
           "repo": "webmachinelearning/webmcp",
           "path": "index.bs",
-          "pin": "bd81b6d06c4d22bd15c14849030bbeb2fb14d9cd"
+          "pin": "ce879543a9013dae3effe292e6deda0b4323a07d"
         }
       ]
     },
@@ -67,7 +67,7 @@
         {
           "kind": "ietf-draft",
           "name": "draft-ietf-webbotauth-httpsig-protocol",
-          "pin": "00"
+          "pin": "01"
         }
       ]
     },
@@ -79,17 +79,17 @@
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/spec",
-          "pin": "3b7a81416cfc5f98d4ce1d6f2cb0e359cbf68a46d5a5317b5a4a856855eb50e3"
+          "pin": "24d8da14fd16c944adeb9969221e6d6a6d9ba089f7299ce8c6a8df8a860001f3"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/extensions/operations",
-          "pin": "6f94925f7306c2d19cb5548e9655c8d414709301ba8ef37c6e1a436969614b7f"
+          "pin": "ec14d1af5ac4a65e0f691e49fbdf57ede32f32552d86ed88865e85bf8eedb169"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/guides",
-          "pin": "f2b0a17c0f420732a721f2843717015cb3f8277fc365a6b829af5e36bd67ea49"
+          "pin": "708fc192545d0a65b596c8dbee038338fe559f21f4d3c203023304a1168420d0"
         }
       ]
     },
@@ -171,7 +171,7 @@
           "kind": "git-path",
           "repo": "x402-foundation/x402",
           "path": "specs",
-          "pin": "fd92aa2f26e0b20985479ef43ab54cb28b555cf2"
+          "pin": "11f02ce95e15d78e246efcbd5253ecbeefc2718d"
         }
       ]
     }

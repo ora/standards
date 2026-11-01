@@ -33,7 +33,7 @@ spec_sources:
 
 Paying for an online service usually means signing up, getting a key and setting up billing, which an autonomous agent can't easily do. MPP uses the web's long-unused "402 Payment Required" code: the server replies "this costs 2 cents, here's how to pay," the client pays, and the server returns the result plus a receipt.
 
-It supports one-off charges, subscriptions and streaming pay-as-you-go "sessions," with stablecoins on the Tempo blockchain or ordinary cards through Stripe. Picture a research agent paying a fraction of a cent per article from a paywalled archive and settling the total when it finishes.
+It supports one-off charges, subscriptions and streaming pay-as-you-go "sessions." One-off charges can use ordinary cards through Stripe; sessions run on stablecoins, such as on the Tempo blockchain. Picture a research agent paying a fraction of a cent per article from a paywalled archive and settling the total when it finishes.
 
 ## Who's behind it
 

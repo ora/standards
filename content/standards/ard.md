@@ -11,7 +11,7 @@ analogy: A search engine for agent tools.
 looks_like: /.well-known/ard.json
 when_to_use: When you offer APIs, MCP servers or agents and want agent search registries to find them.
 backers: Google-led authors (Google, Hugging Face, R.V. Guha)
-reality_check: Early. [Hugging Face runs a public registry](https://huggingface.co/blog/agentic-resource-discovery-launch), and Hugging Face and GitHub now publish catalogs, though GitHub's is only at the older `ai-catalog.json` address. According to [an independent sweep in September 2026](https://github.com/Agent-Card/ai-catalog/issues/115), only 24 of 102 publishers could be found at `ard.json`; the other 78 used only `ai-catalog.json`.
+reality_check: Early. [Hugging Face runs a public registry](https://huggingface.co/blog/agentic-resource-discovery-launch), and Hugging Face and GitHub now publish catalogs, though both only at the older [`ai-catalog.json`](https://huggingface.co/.well-known/ai-catalog.json) address. According to [an independent sweep in September 2026](https://github.com/Agent-Card/ai-catalog/issues/115), only 24 of 102 publishers could be found at `ard.json`; the other 78 used only `ai-catalog.json`.
 links:
   - label: Specification (v0.91)
     url: https://agenticresourcediscovery.org/spec/
@@ -22,12 +22,12 @@ links:
 related:
   - id: ai-catalog
     note: Its predecessor, now the publishing format. ARD is the discovery format. Serve the same file at both addresses.
-last_verified: "2026-10-19"
+last_verified: "2026-10-30"
 spec_sources:
   - kind: git-path
     repo: ards-project/ard-spec
     path: spec
-    pin: "40151d4a76af2e266723f78d9142f54a89fb5dcf"
+    pin: "eca2857d0c9b7b27aa2fb72fe3bb69fcd0d18ea9"
 ---
 
 ## How it works

@@ -3,7 +3,7 @@ name: WebMCP
 job: act
 order: 1
 status: early
-status_note: Draft (Oct 16, 2026); Chrome and Edge trials; live in ChatGPT desktop and Shopify
+status_note: Draft (Oct 27, 2026); Chrome and Edge trials; live in ChatGPT desktop and Shopify
 tagline: page tools
 phrase: A page hands typed tools to the agent in your browser
 analogy: A labeled menu of actions for the agent in your browser.
@@ -12,7 +12,7 @@ when_to_use: When agents use your site in people's browsers. Add tools to your k
 backers: W3C Web ML community group; Microsoft and Google editors
 reality_check: Early use with two big real-world users, ChatGPT's desktop browser and Shopify, while Chrome and Edge are still in trials.
 links:
-  - label: Draft (Oct 16, 2026)
+  - label: Draft (Oct 27, 2026)
     url: https://webmachinelearning.github.io/webmcp/
   - label: Chrome docs
     url: https://developer.chrome.com/docs/ai/webmcp
@@ -23,12 +23,12 @@ related:
     note: NLWeb is an endpoint on your server. WebMCP works inside the browser page.
   - id: ucp
     note: Shopify puts WebMCP tools on every Liquid storefront, next to its UCP support.
-last_verified: "2026-10-19"
+last_verified: "2026-10-30"
 spec_sources:
   - kind: git-path
     repo: webmachinelearning/webmcp
     path: index.bs
-    pin: "bd81b6d06c4d22bd15c14849030bbeb2fb14d9cd"
+    pin: "ce879543a9013dae3effe292e6deda0b4323a07d"
 ---
 
 ## How it works
@@ -41,11 +41,11 @@ One caveat: a page's tool descriptions are text the AI reads, so a malicious sit
 
 ## Who's behind it
 
-Microsoft and Google proposed it together in August 2025; the W3C's Web Machine Learning community group took it up that September, with editors from both companies. The current text is a [draft dated October 16, 2026](https://webmachinelearning.github.io/webmcp/) that says plainly it is "not a W3C Standard."
+Microsoft and Google proposed it together in August 2025; the W3C's Web Machine Learning community group took it up that September, with editors from both companies. The current text is a [draft dated October 27, 2026](https://webmachinelearning.github.io/webmcp/) that says plainly it is "not a W3C Standard." A [draft W3C charter](https://w3c.github.io/charter-drafts/2026/agenticweb-wg.html) for a new Agentic Web Working Group would take WebMCP as its starting text, but that group does not exist yet.
 
-[Chrome has been testing it](https://developer.chrome.com/docs/ai/webmcp) in a time-limited "origin trial" (Chrome 149-156) since May 2026; on September 28 [Google asked to extend the trial](http://www.mail-archive.com/blink-dev@chromium.org/msg17568.html) to Chrome 162 because feedback is still changing the API, so there's no ship date. [Edge runs its own trial](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/trials/0b76fe60-b266-458e-a285-04e375c0c31a) (through March 30, 2027) and [calls it "ready for testing."](https://blogs.windows.com/msedgedev/2026/09/21/new-in-edge-for-developers-create-better-components-and-make-your-site-agent-ready/)
+[Chrome has been testing it](https://developer.chrome.com/docs/ai/webmcp) in a time-limited "origin trial" (Chrome 149-156) since May 2026; on September 28 [Google asked to extend the trial](http://www.mail-archive.com/blink-dev@chromium.org/msg17568.html) to Chrome 162 because feedback is still changing the API, so there's no ship date. On October 28, Google said [pages using the trial had passed 0.5% of all Chrome page loads](http://www.mail-archive.com/blink-dev@chromium.org/msg17895.html), though agents call the tools far less often. [Edge runs its own trial](https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/trials/0b76fe60-b266-458e-a285-04e375c0c31a) (through March 30, 2027) and [calls it "ready for testing."](https://blogs.windows.com/msedgedev/2026/09/21/new-in-edge-for-developers-create-better-components-and-make-your-site-agent-ready/)
 
-[ChatGPT's desktop browser calls these "site tools"](https://help.openai.com/en/articles/20001423-using-site-tools-in-the-chatgpt-desktop-app) automatically, and [Shopify puts WebMCP tools on every Liquid storefront](https://shopify.dev/docs/api/web-mcp) (Hydrogen stores can turn them on), including a [checkout tool that agents may only call after the buyer approves the order and total](https://shopify.dev/docs/agents/carts-and-checkout/checkout-webmcp). [Safari's team opposes it](https://github.com/WebKit/standards-positions/issues/670) and [Firefox is neutral](https://github.com/mozilla/standards-positions/issues/1412).
+[ChatGPT's desktop browser calls these "site tools"](https://help.openai.com/en/articles/20001423-using-site-tools-in-the-chatgpt-desktop-app) automatically, and [Shopify puts WebMCP tools on every Liquid storefront](https://shopify.dev/docs/api/web-mcp) (and on Hydrogen stores from the 2026-10 release, unless turned off), including a [checkout tool that agents may only call after the buyer approves the order and total](https://shopify.dev/docs/agents/carts-and-checkout/checkout-webmcp). [Safari's team opposes it](https://github.com/WebKit/standards-positions/issues/670) and [Firefox is neutral](https://github.com/mozilla/standards-positions/issues/1412).
 
 ## Neighbours
 
