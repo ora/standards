@@ -6,7 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = currentSiteUrl();
   const at = (path: string) => new URL(path, base).toString();
   return [
-    ...["/", "/compare", "/which", "/contribute"].map((path) => ({ url: at(path) })),
+    ...["/", "/compare", "/which", "/play", "/play/leaderboard", "/contribute"].map((path) => ({ url: at(path) })),
     ...getStandards().map((s) => ({ url: at(`/standards/${s.id}`), lastModified: s.last_verified })),
   ];
 }

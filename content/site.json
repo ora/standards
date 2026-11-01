@@ -28,6 +28,10 @@
         "href": "/which"
       },
       {
+        "label": "Quiz",
+        "href": "/play"
+      },
+      {
         "label": "Contribute",
         "href": "/contribute"
       }
