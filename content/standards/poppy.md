@@ -38,13 +38,13 @@ last_verified: "2026-10-30"
 spec_sources:
   - kind: page
     url: https://personalagentprotocol.org/docs/spec
-    pin: "24d8da14fd16c944adeb9969221e6d6a6d9ba089f7299ce8c6a8df8a860001f3"
+    pin: "38149d0270d9283a75bfb940dea7d82b7f2dec4585f67a42d3f6ef1f23bb372c"
   - kind: page
     url: https://personalagentprotocol.org/docs/extensions/operations
-    pin: "ec14d1af5ac4a65e0f691e49fbdf57ede32f32552d86ed88865e85bf8eedb169"
+    pin: "f0e133d52f1d06ff192bb450a03b19afdf3d6ed0d36e86ebc0dbfa56acf46f9f"
   - kind: page
     url: https://personalagentprotocol.org/docs/guides
-    pin: "708fc192545d0a65b596c8dbee038338fe559f21f4d3c203023304a1168420d0"
+    pin: "46aea8901fc92a2f9a4ea0eccf5d0b6ebe175c432957e446f54f3075afbd543e"
 ---
 
 ## How it works
