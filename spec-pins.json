@@ -77,19 +77,31 @@
       "page": "https://ax.guide/standards/poppy",
       "sources": [
         {
+          "kind": "git-path",
+          "repo": "personal-agent-protocol/personal-agent-protocol",
+          "path": "content/versions/0.3",
+          "pin": "1e12f5a57bb3373ce90fdb41ad4d6bad8f960895"
+        },
+        {
+          "kind": "git-path",
+          "repo": "personal-agent-protocol/personal-agent-protocol",
+          "path": "content/versions/versions.json",
+          "pin": "b2ffb3afe546a2334d63052b0e97e3921e31117a"
+        },
+        {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/spec",
-          "pin": "24d8da14fd16c944adeb9969221e6d6a6d9ba089f7299ce8c6a8df8a860001f3"
+          "pin": "2e6063f39dac6f2bf8eb541e2f28e7cc6c85345c2f726216285ab55738c1b185"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/extensions/operations",
-          "pin": "ec14d1af5ac4a65e0f691e49fbdf57ede32f32552d86ed88865e85bf8eedb169"
+          "pin": "e5a42cb211e68ffff1cc4072456ce326fec4de2cc8b83cff37a63c522fbc2b57"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/guides",
-          "pin": "708fc192545d0a65b596c8dbee038338fe559f21f4d3c203023304a1168420d0"
+          "pin": "be0a953dd371f028369bb1a307e6614ecda1e67f02564c552c3a656b25782e75"
         }
       ]
     },
