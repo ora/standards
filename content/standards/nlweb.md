@@ -13,7 +13,7 @@ backers: Microsoft (R.V. Guha)
 reality_check: Early. Nobody publishes a deployment count, partly because NLWeb has no fixed address to crawl.
 links:
   - label: Specification (v0.55)
-    url: https://nlweb.ai/docs/specification
+    url: https://github.com/nlweb-ai/website/blob/main/NLWEBSPEC.md
   - label: Source code
     url: https://github.com/nlweb-ai/NLWeb
   - label: Microsoft's announcement
@@ -39,10 +39,10 @@ spec_sources:
 
 Most websites already describe their content in structured ways (Schema.org tags, RSS feeds), yet you can still only search them with keywords. NLWeb indexes that structured data and adds an "ask" endpoint: type "vegetarian recipes under 30 minutes without nuts" and get answers drawn only from that site.
 
-Every NLWeb site is also an MCP server, so AI agents can ask the same questions through a standard plug. [Cloudflare offers an "NLWeb Website" option](https://developers.cloudflare.com/ai-search/how-to/nlweb), in public preview, that crawls your site and sets up an `/ask` page for people and an `/mcp` endpoint for agents.
+An NLWeb site can also offer `ask` as an MCP tool (the reference code and Cloudflare's setup both do), so AI agents can ask the same questions through a standard plug. The spec makes that optional. [Cloudflare offers an "NLWeb Website" option](https://developers.cloudflare.com/ai-search/how-to/nlweb), in public preview, that crawls your site and sets up an `/ask` page for people and an `/mcp` endpoint for agents.
 
 ## Who's behind it
 
 [Microsoft introduced it](https://news.microsoft.com/source/features/company-news/introducing-nlweb-bringing-conversational-interfaces-directly-to-the-web/) at its Build conference on May 19, 2025; R.V. Guha conceived it. [The code is open source](https://github.com/nlweb-ai/NLWeb) and the current spec is v0.55.
 
-A [W3C community group](https://www.w3.org/community/nlweb) launched in October 2025 but still has no chairs, 15 participants and no published reports, and community groups aren't a standards track, so NLWeb is not a W3C standard. Launch partners included Allrecipes, Eventbrite, Tripadvisor, O'Reilly and Shopify. A security bug that let attackers read server files was reported and fixed in mid-2025.
+A [W3C community group](https://www.w3.org/community/nlweb) launched in October 2025 but still has no chairs, 13 participants and no published reports, and community groups aren't a standards track, so NLWeb is not a W3C standard. Launch partners included Allrecipes, Eventbrite, Tripadvisor, O'Reilly and Shopify. A security bug that let attackers read server files was reported and fixed in mid-2025.

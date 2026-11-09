@@ -36,11 +36,11 @@ When your agent needs a service you've never used, it hits a wall built to keep 
 
 Ask a coding agent to add web scraping to your app, and it calls the scraping service, gets "401: who are you?" plus a pointer to the service's login details and auth.md file, then signs you up one of three ways:
 
-- **Vouched for:** the company running the agent signs a short-lived pass saying "this is a verified user" and registration finishes on its own.
+- **Vouched for:** the company running the agent signs a short-lived pass saying "this is a verified user" and registration finishes on its own for a new account (an existing account still asks you to confirm with a code).
 - **By email:** the agent gives you a short code and a link. You sign in on the service's own page and type the code.
 - **Anonymously:** the agent starts with limited access and you "claim" the account later.
 
-Either way, it ends with a normal, short-lived, revocable OAuth token tied to you.
+Either way, it ends with a normal, short-lived, revocable OAuth token, tied to you once the account is claimed.
 
 ## Who's behind it
 
