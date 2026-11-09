@@ -8,7 +8,7 @@ status_note: Beta, stable 2026-04-17; live for discovery
 tagline: into ChatGPT
 phrase: Products (and checkout) into ChatGPT
 analogy: A catalogue mailed straight to your personal shopper, with an optional order form attached.
-looks_like: Product feeds + checkout endpoints
+looks_like: /.well-known/acp.json + product feeds + checkout endpoints
 when_to_use: When you want your products shown in ChatGPT, especially if you already use Stripe.
 backers: OpenAI + Stripe, with Meta on the steering committee
 reality_check: In production for discovery. The headline feature that launched ACP, buying inside ChatGPT, is exactly the part that was scaled back.
