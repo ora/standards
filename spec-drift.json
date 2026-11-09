@@ -38,7 +38,9 @@
       "since": "2026-11-02"
     },
     "x402": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/27",
+      "since": "2026-11-09"
     }
   }
 }
