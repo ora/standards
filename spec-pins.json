@@ -42,7 +42,7 @@
           "kind": "git-path",
           "repo": "webmachinelearning/webmcp",
           "path": "index.bs",
-          "pin": "ce879543a9013dae3effe292e6deda0b4323a07d"
+          "pin": "847677e03d3e61aaddf65ad328147129083168c0"
         }
       ]
     },
@@ -171,7 +171,7 @@
           "kind": "git-path",
           "repo": "x402-foundation/x402",
           "path": "specs",
-          "pin": "11f02ce95e15d78e246efcbd5253ecbeefc2718d"
+          "pin": "e54f095315cfc0e936a130840c44a9c6d73bdb3f"
         }
       ]
     }
