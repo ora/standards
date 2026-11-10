@@ -34,7 +34,7 @@ related:
     note: Poppy finds the company and signs you in; its UCP extension hands carts, checkout and payment to UCP.
   - id: ap2
     note: Payments are not covered yet. Until they are, payment consent needs another protocol, such as AP2.
-last_verified: "2026-11-10"
+last_verified: "2026-10-30"
 spec_sources:
   - kind: git-path
     repo: personal-agent-protocol/personal-agent-protocol
