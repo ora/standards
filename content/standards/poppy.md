@@ -35,33 +35,7 @@ related:
   - id: ap2
     note: Payments are not covered yet. Until they are, payment consent needs another protocol, such as AP2.
 last_verified: "2026-10-30"
-spec_sources:
-  - kind: git-path
-    repo: personal-agent-protocol/personal-agent-protocol
-    path: content/versions/0.3
-    pin: "1e12f5a57bb3373ce90fdb41ad4d6bad8f960895"
-  - kind: git-path
-    repo: personal-agent-protocol/personal-agent-protocol
-    path: content/versions/versions.json
-    pin: "359b99e717a9fee2937216ce71af63eee0b3eceb"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/spec
-    pin: "654a1339d24bfc2ee1eb4082657fb7d68f322d6e52fc8c1f7c1d7ca22b73289c"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/extensions/operations
-    pin: "f8bf4eaebc1dabfb22b21fcf24d6d572f78caa669dae54d024cb8d1cce962c04"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/guides
-    pin: "9f7c5a9a77fece2fd3d9c2acb4fc0ec236117a0bacdfa4c724062a8839b1a89d"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/extensions
-    pin: "82ca57a473356ae3c0010acb42dff23f107612ac9cbb97b7ece36b50c3c82b03"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/extensions/browser-control
-    pin: "611e30c47fef811bef0d4fbf682218f16353962df010763e879134e7dc759bd0"
-  - kind: page
-    url: https://personalagentprotocol.org/docs/extensions/mediated-sign-in
-    pin: "b4c3b5aafade726dad00ef4b48c8ab7854379b1ecc237879c878b537264b8e1e"
+spec: pap
 ---
 
 ## How it works

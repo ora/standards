@@ -44,21 +44,13 @@ A partner list is not adoption, and a transaction count is not commerce. If a nu
 - Put the spec first in `links`.
 - Change `last_verified` only when you have rechecked **every** claim on the page.
 
-## Spec sources
+## Which spec a page describes
 
-Every standard lists where its spec lives in `spec_sources`, with a `pin`: the exact state of the spec that was read (a Git SHA, a release tag, a draft revision, or a digest of a page's text). Once a week a check ([`scripts/spec-drift.mjs`](scripts/spec-drift.mjs), run by [`spec-drift-watch.yml`](.github/workflows/spec-drift-watch.yml)) compares each spec with its pins. When one changed, it opens an issue that links what changed, and the standard's page says "The spec changed after this check" until the pins move. The template lists the kinds of source.
+Every standard names its spec with `spec`, an id from the [Ora spec registry](https://github.com/ora/specs) (`specs/<id>/spec.yaml` there). The registry, not this repository, records each spec's versions, where it lives and the exact state Ora last reviewed, and it ships to this site as the `@ora-ai/specs` package. Every [`/specs`](https://ax.guide/specs) row, [`/specs.json`](https://ax.guide/specs.json) and `/specs/<id>.json` come from it.
 
-An issue still open after 14 days gets the `spec-drift-overdue` label and a comment that mentions a maintainer. If the run itself fails, it opens a separate issue, which closes after the next good run.
+Once a day the registry's watch compares each spec with its reviewed state. When one changed, it opens an issue on the registry that links what changed, and the standard's page here says "The spec changed after its last review" until the registry moves its pins. To track a spec the registry does not list yet, or to report a change it missed, open an issue or a pull request on [ora/specs](https://github.com/ora/specs).
 
-When the repository has a Claude key (`ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` secret), each new issue also starts [`spec-drift-fix.yml`](.github/workflows/spec-drift-fix.yml). It opens a pull request that moves the pins and carries Claude's review of the change: what changed, which claims on the page still hold, and suggested edits with sources. Claude only writes that review (it reads files, with no shell, web access or GitHub token), so make the edits on the pull request's branch yourself, after checking them. A newer dated revision (ACP's spec folders) is never adopted automatically; the review is posted on the issue instead. Close and reopen that pull request to run CI on it. You can start the workflow by hand for any open drift issue from the Actions tab.
-
-When you handle one of those issues yourself:
-
-1. Read what changed and recheck the page against it.
-2. Set each moved `pin` to the live value the issue lists, even when nothing on the page needed to change: moving a pin is the record that someone read the change.
-3. Run `npm run pins`. It regenerates [`spec-pins.json`](spec-pins.json), which the check reads, and the tests fail until it matches the content files.
-
-To see the live state yourself, run `node scripts/spec-drift.mjs check spec-pins.json --only <id>`. It needs Node and Git, no install. [Ora](https://ora.ai) reads `spec-pins.json` too and compares it with the pins behind its own checks, so tell us in the pull request if a change looks like it should change how sites are scored.
+The page's own check stays here: change `last_verified` only when you rechecked every claim on the page. A spec change upstream is a reason to recheck, so a drift note is a good place to start a correction.
 
 ## House style
 
@@ -91,7 +83,7 @@ npm test
 npm run build
 ```
 
-If you added a standard or changed a name or a `phrase`, run `npm run readme` too: it regenerates the table of standards in the README, and the tests fail until it matches. If you changed `spec_sources`, run `npm run pins` for the same reason.
+If you added a standard or changed a name or a `phrase`, run `npm run readme` too: it regenerates the table of standards in the README, and the tests fail until it matches.
 
 ## License of contributions
 
