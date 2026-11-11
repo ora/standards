@@ -9,6 +9,15 @@
     ]
   },
   {
+    "id": "nlweb-vs-cap",
+    "title": "NLWeb vs CAP",
+    "summary": "Search the site's content vs. ask the company's agent.",
+    "sides": [
+      { "id": "nlweb", "says": "An ask endpoint that answers from your site's structured data." },
+      { "id": "cap", "says": "A text file that sends the question to your own agent, with optional sign-in for account questions." }
+    ]
+  },
+  {
     "id": "ucp-vs-acp",
     "title": "UCP vs ACP",
     "summary": "Any assistant vs. ChatGPT.",

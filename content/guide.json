@@ -5,6 +5,7 @@
     { "situation": "You offer APIs, MCP servers or agents and want to be found", "standards": ["ard", "ai-catalog"], "note": "Serve the same file at both ard.json and ai-catalog.json." },
     { "situation": "Agents use your site inside people's browsers", "standards": ["webmcp"], "note": "Add tools to your key flows, and keep the normal page." },
     { "situation": "You have lots of structured content people and agents want to query", "standards": ["nlweb"] },
+    { "situation": "You already run a support or sales agent and want other agents to ask it", "standards": ["cap"], "note": "Track it; 1.0 Draft is from October 16, 2026, and every listed site is served by the author's company." },
     { "situation": "Your bot visits other sites, or you need to verify bots on yours", "standards": ["web-bot-auth"] },
     { "situation": "You want agents to create accounts on your service without a sign-up form", "standards": ["auth-md"] },
     { "situation": "Customers' own agents should sign in and act on their accounts", "standards": ["poppy"], "note": "Track it; Draft 0.2 is from October 24, 2026, and 0.3 is in progress." },
