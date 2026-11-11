@@ -24,11 +24,7 @@ related:
   - id: ucp
     note: Shopify puts WebMCP tools on every Liquid storefront, next to its UCP support.
 last_verified: "2026-10-30"
-spec_sources:
-  - kind: git-path
-    repo: webmachinelearning/webmcp
-    path: index.bs
-    pin: "68a80fe3d10fac37dd42e2dee57b16989804392c"
+spec: webmcp
 ---
 
 ## How it works

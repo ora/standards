@@ -22,10 +22,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "readme": "UPDATE_README=1 vitest run tests/readme.test.ts",
-    "pins": "UPDATE_PINS=1 vitest run tests/spec-pins.test.ts"
+    "readme": "UPDATE_README=1 vitest run tests/readme.test.ts"
   },
   "dependencies": {
+    "@ora-ai/specs": "file:vendor/ora-ai-specs-0.1.0.tgz",
     "marked": "18.1.0",
     "next": "16.3.8",
     "react": "19.3.0",
