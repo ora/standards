@@ -40,8 +40,8 @@ last_verified: "2026-11-12"
 spec_sources:
   - kind: git-path
     repo: personal-agent-protocol/personal-agent-protocol
-    path: content/versions/0.4
-    pin: "399ba1bd27f72fc55e9a6dfe852d3725ad325051"
+    path: content/versions/1.0
+    pin: "720a0fe76f4b826d2008679395c26779319bf965"
   - kind: git-path
     repo: personal-agent-protocol/personal-agent-protocol
     path: content/versions/versions.json
