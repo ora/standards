@@ -60,6 +60,19 @@
       ]
     },
     {
+      "id": "cap",
+      "name": "CAP",
+      "page": "https://ax.guide/standards/cap",
+      "sources": [
+        {
+          "kind": "git-path",
+          "repo": "conciergeprotocol/cap",
+          "path": "spec.md",
+          "pin": "66495014ef731b8d5e81102e2d73e5e88d8923d0"
+        }
+      ]
+    },
+    {
       "id": "web-bot-auth",
       "name": "Web Bot Auth",
       "page": "https://ax.guide/standards/web-bot-auth",

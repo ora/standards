@@ -27,6 +27,8 @@ related:
     note: WebMCP works inside the browser page. NLWeb is an endpoint on your server.
   - id: ai-catalog
     note: An AI catalog (or ARD file) can list your NLWeb endpoint.
+  - id: cap
+    note: CAP also lets an agent ask a site, but hands the question to the company's own agent instead of searching its content.
 last_verified: "2026-10-19"
 spec_sources:
   - kind: git-path

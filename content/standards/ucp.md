@@ -11,7 +11,7 @@ analogy: A universal power socket for shopping. Any assistant plugs into any sto
 looks_like: /.well-known/ucp
 when_to_use: When you sell goods and want any AI assistant to browse, cart and check out.
 backers: Google + Shopify, with governing and tech councils
-reality_check: In production, and the most real of the twelve. According to an independent tracker, [UCP Checker](https://ucpchecker.com/blog/state-of-agentic-commerce-september-2026), about 17,800 stores had a working UCP profile on September 22, 2026, about 60% of them on Shopify and most of the rest on Wix. One catch is that the [August release](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25) lists 11 groups of breaking changes, and about four in ten stores still declare the April version, so "supports UCP" doesn't tell you which version.
+reality_check: In production, and the most real of the thirteen. According to an independent tracker, [UCP Checker](https://ucpchecker.com/blog/state-of-agentic-commerce-september-2026), about 17,800 stores had a working UCP profile on September 22, 2026, about 60% of them on Shopify and most of the rest on Wix. One catch is that the [August release](https://github.com/Universal-Commerce-Protocol/ucp/releases/tag/v2026-08-25) lists 11 groups of breaking changes, and about four in ten stores still declare the April version, so "supports UCP" doesn't tell you which version.
 links:
   - label: Specification (ucp.dev)
     url: https://ucp.dev/
