@@ -79,29 +79,29 @@
         {
           "kind": "git-path",
           "repo": "personal-agent-protocol/personal-agent-protocol",
-          "path": "content/versions/0.3",
-          "pin": "1e12f5a57bb3373ce90fdb41ad4d6bad8f960895"
+          "path": "content/versions/0.4",
+          "pin": "399ba1bd27f72fc55e9a6dfe852d3725ad325051"
         },
         {
           "kind": "git-path",
           "repo": "personal-agent-protocol/personal-agent-protocol",
           "path": "content/versions/versions.json",
-          "pin": "359b99e717a9fee2937216ce71af63eee0b3eceb"
+          "pin": "ff7c9a373e46e3f23957eae598cf1bf172e1b769"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/spec",
-          "pin": "654a1339d24bfc2ee1eb4082657fb7d68f322d6e52fc8c1f7c1d7ca22b73289c"
+          "pin": "a92048d4ae0789a65af128f3a2d6295299c6cf0161a737d1064f8b51738d3383"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/extensions/operations",
-          "pin": "f8bf4eaebc1dabfb22b21fcf24d6d572f78caa669dae54d024cb8d1cce962c04"
+          "pin": "3ff24dccc84e121b638ab6f448bd9fd56188350c9723bbccac6bd2d15e5b846c"
         },
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/guides",
-          "pin": "9f7c5a9a77fece2fd3d9c2acb4fc0ec236117a0bacdfa4c724062a8839b1a89d"
+          "pin": "e2615c6deac2213b60fbec6da918169a57c77677b71adca712e045a814b4e832"
         },
         {
           "kind": "page",
@@ -116,7 +116,7 @@
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/extensions/mediated-sign-in",
-          "pin": "b4c3b5aafade726dad00ef4b48c8ab7854379b1ecc237879c878b537264b8e1e"
+          "pin": "038750a9437204cb4142ea17a2fdffdece2f4ca5b64a89dd530ad4d656f52b13"
         }
       ]
     },
