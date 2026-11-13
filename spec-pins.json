@@ -80,7 +80,7 @@
           "kind": "git-path",
           "repo": "personal-agent-protocol/personal-agent-protocol",
           "path": "content/versions/1.0",
-          "pin": "720a0fe76f4b826d2008679395c26779319bf965"
+          "pin": "0800017f4ba402b8f5616b20eacf32ae8b103f0a"
         },
         {
           "kind": "git-path",
@@ -91,7 +91,7 @@
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/spec",
-          "pin": "a92048d4ae0789a65af128f3a2d6295299c6cf0161a737d1064f8b51738d3383"
+          "pin": "396c448f352fddc00a4ec3c9659142381d4a058f69873c8024fcafebc4443d33"
         },
         {
           "kind": "page",
@@ -101,7 +101,7 @@
         {
           "kind": "page",
           "url": "https://personalagentprotocol.org/docs/guides",
-          "pin": "e2615c6deac2213b60fbec6da918169a57c77677b71adca712e045a814b4e832"
+          "pin": "fc46a65967b779f7e1e8e3cf338803a9d2c26b51e5d0b480682d961b8d3946fe"
         },
         {
           "kind": "page",
