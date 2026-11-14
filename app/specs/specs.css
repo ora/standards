@@ -1,0 +1,55 @@
+/* The spec registry table. Shares the comparison table's layout (compare.css). */
+
+.spec-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.spec-name {
+  font-size: 1.125rem;
+  font-weight: 900;
+  font-stretch: 100%;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.spec-name:hover {
+  background-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.spec-versions {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spec-versions li {
+  overflow-wrap: anywhere;
+}
+
+.spec-versions__status {
+  color: var(--color-ink-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.spec-versions li[data-status="current"] .spec-versions__status {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.spec-latest__changed {
+  padding: 0 0.25em;
+  background-color: var(--accent);
+  color: var(--on-accent);
+}

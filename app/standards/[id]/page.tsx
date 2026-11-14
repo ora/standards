@@ -6,7 +6,7 @@ import { StandardTile } from "@/components/standard-tile";
 import { StatusBadge } from "@/components/status-badge";
 import { content, editHref, formatDate } from "@/lib/content";
 import { renderInline, renderMarkdown } from "@/lib/markdown";
-import { getSpecDrift } from "@/lib/spec-drift";
+import { getSpecDrift } from "@/lib/specs";
 import { daysSince, getJob, getStandard, getStandards } from "@/lib/standards";
 import "../standard.css";
 
@@ -14,8 +14,8 @@ type Props = { params: Promise<{ id: string }> };
 
 // Every standard is a file, so every page is made at build time.
 export const dynamicParams = false;
-// Made again at most hourly (SPEC_DRIFT_REVALIDATE), to pick up the spec
-// drift status and keep the "out of date" mark current between deploys.
+// Made again at most hourly (SPEC_STATUS_REVALIDATE), to pick up the spec
+// registry's status and keep the "out of date" mark current between deploys.
 export const revalidate = 3600;
 
 export function generateStaticParams() {
@@ -46,7 +46,7 @@ export default async function StandardPage({ params }: Props) {
     return target ? [{ ...r, standard: target }] : [];
   });
   const stale = daysSince(standard.last_verified) > content.staleAfterDays;
-  const drift = await getSpecDrift(standard.id);
+  const drift = await getSpecDrift(standard.spec);
   const file = `content/standards/${standard.id}.md`;
 
   return (

@@ -25,11 +25,7 @@ related:
   - id: nlweb
     note: A catalog can list an NLWeb endpoint.
 last_verified: "2026-10-30"
-spec_sources:
-  - kind: git-path
-    repo: Agent-Card/ai-catalog
-    path: specification
-    pin: "7ee97d9655a13e1f6442ab505982c03db17134ea"
+spec: ai-catalog
 ---
 
 ## How it works
