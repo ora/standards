@@ -4,7 +4,9 @@
       "changed": false
     },
     "ai-catalog": {
-      "changed": false
+      "changed": true,
+      "issue": "https://github.com/ora/standards/issues/37",
+      "since": "2026-11-16"
     },
     "ap2": {
       "changed": false
@@ -22,9 +24,7 @@
       "changed": false
     },
     "poppy": {
-      "changed": true,
-      "issue": "https://github.com/ora/standards/issues/23",
-      "since": "2026-11-02"
+      "changed": false
     },
     "ucp": {
       "changed": false
