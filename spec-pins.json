@@ -86,7 +86,7 @@
           "kind": "git-path",
           "repo": "personal-agent-protocol/personal-agent-protocol",
           "path": "content/versions/versions.json",
-          "pin": "c36e148cac84a2965f55a5e8f80ca18b50954041"
+          "pin": "db1e28365d028eda90ae62fab083471a68fac012"
         },
         {
           "kind": "page",

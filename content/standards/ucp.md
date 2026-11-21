@@ -25,7 +25,7 @@ related:
   - id: ap2
     note: AP2 plugs in for payment consent; UCP's latest release has an AP2 extension.
   - id: poppy
-    note: May overlap with UCP on sign-in.
+    note: Poppy finds the store, names the agent and an anonymous ID for you, and signs you in; through its UCP extension, UCP handles carts, checkout and payment.
 last_verified: "2026-10-19"
 spec_sources:
   - kind: git-latest-tag
