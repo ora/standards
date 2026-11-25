@@ -27,7 +27,7 @@ last_verified: "2026-10-19"
 spec_sources:
   - kind: git-head
     repo: workos/auth.md
-    pin: "b53c9edfbfeea679b617727ebca9ba436bade794"
+    pin: "3a61c3c08e7677681bbaa61786111adce4065424"
 ---
 
 ## How it works

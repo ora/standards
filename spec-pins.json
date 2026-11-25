@@ -128,7 +128,7 @@
         {
           "kind": "git-head",
           "repo": "workos/auth.md",
-          "pin": "b53c9edfbfeea679b617727ebca9ba436bade794"
+          "pin": "3a61c3c08e7677681bbaa61786111adce4065424"
         }
       ]
     },
@@ -198,7 +198,7 @@
           "kind": "git-path",
           "repo": "x402-foundation/x402",
           "path": "specs",
-          "pin": "e54f095315cfc0e936a130840c44a9c6d73bdb3f"
+          "pin": "5b46a023e94c7f39828c41863d3d4f575f02e1a9"
         }
       ]
     }
