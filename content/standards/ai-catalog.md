@@ -4,7 +4,7 @@ full_name: AI Catalog
 job: find
 order: 2
 status: early
-status_note: Draft; MCP Server Cards (final) point to it; small real use
+status_note: v0.9, release candidate for 1.0 (Nov 19, 2026); MCP Server Cards (final) point to it; small real use
 tagline: site's AI list
 phrase: A site's list of its AI offerings
 analogy: Your site's table of contents for AI.
@@ -29,7 +29,7 @@ spec_sources:
   - kind: git-path
     repo: Agent-Card/ai-catalog
     path: specification
-    pin: "7ee97d9655a13e1f6442ab505982c03db17134ea"
+    pin: "0334f1f95acf89ecf3350a32e0a4ee0136068273"
 ---
 
 ## How it works
@@ -42,6 +42,6 @@ An entry can also carry optional Trust Manifests: claims about the tool, such as
 
 ## Who's behind it
 
-It's developed in a [Linux Foundation working repository](https://github.com/Agent-Card/ai-catalog) (started October 2025) with members from the MCP and A2A communities, and published at [ai-catalog.io](https://ai-catalog.io/). Even the group's name is inconsistent: ai-catalog.io calls it the "Agent Card Working Group," while Google thanks the "AI Catalog Working Group."
+It's developed in a [Linux Foundation working repository](https://github.com/Agent-Card/ai-catalog) (started October 2025) with members from the MCP and A2A communities, and published at [ai-catalog.io](https://ai-catalog.io/). On November 19, 2026, the group [named the spec v0.9](https://github.com/Agent-Card/ai-catalog/pull/141), a release candidate for 1.0: ready to build on, but it may still change before the final 1.0. Catalogs written to it say `"specVersion": "0.9"`, not `"1.0"`. Even the group's name is inconsistent: ai-catalog.io calls it the "Agent Card Working Group," while Google thanks the "AI Catalog Working Group."
 
 Its biggest recent boost: [MCP's "Server Cards" proposal](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127) points discovery at `ai-catalog.json`; it was [marked final](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2127-mcp-server-cards.md) on October 6, 2026. ARD calls ai-catalog its predecessor, but ai-catalog sees itself as a lightweight publishing format that stays separate, loosely linked to ARD for now: it was split off, not retired.

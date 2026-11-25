@@ -16,7 +16,7 @@
           "kind": "git-path",
           "repo": "ards-project/ard-spec",
           "path": "spec",
-          "pin": "eca2857d0c9b7b27aa2fb72fe3bb69fcd0d18ea9"
+          "pin": "c9d8b0d2227e4bd02e0abd0f5e2b1d6116df0a9e"
         }
       ]
     },
@@ -29,7 +29,7 @@
           "kind": "git-path",
           "repo": "Agent-Card/ai-catalog",
           "path": "specification",
-          "pin": "7ee97d9655a13e1f6442ab505982c03db17134ea"
+          "pin": "0334f1f95acf89ecf3350a32e0a4ee0136068273"
         }
       ]
     },
