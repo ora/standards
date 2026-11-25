@@ -27,7 +27,7 @@ spec_sources:
   - kind: git-path
     repo: ards-project/ard-spec
     path: spec
-    pin: "eca2857d0c9b7b27aa2fb72fe3bb69fcd0d18ea9"
+    pin: "c9d8b0d2227e4bd02e0abd0f5e2b1d6116df0a9e"
 ---
 
 ## How it works
@@ -40,4 +40,4 @@ Separate "registries" collect these files and answer plain-language searches. Sa
 
 [Google announced ARD](https://developers.googleblog.com/announcing-the-agentic-resource-discovery-specification/) on June 17, 2026. The [current version is v0.91](https://agenticresourcediscovery.org/spec/), a "Proposal" dated August 26, 2026, from authors at Google and Hugging Face plus R.V. Guha (who helped create RSS and Schema.org).
 
-It tells agents to look for `ard.json` first and treats the older `ai-catalog.json` address as its predecessor. At a meeting on July 9, 2026 the two groups agreed to keep them [loosely linked, at least for now](https://github.com/ards-project/ard-spec/blob/main/adr/0010-ard-and-ai-catalog-loose-coupling.md): ai-catalog is the *publishing* format and ARD is the *discovery* format. The ARD project recorded this as a formal decision on October 11, 2026. The file name changed within a few months, so early tutorials already show the old address.
+It tells agents to look for `ard.json` first and treats the older `ai-catalog.json` address as its predecessor. At a meeting on July 9, 2026 the two groups agreed to keep them [loosely linked, at least for now](https://github.com/ards-project/ard-spec/blob/main/adr/0010-ard-and-ai-catalog-loose-coupling.md): ai-catalog is the *publishing* format and ARD is the *discovery* format. The ARD project recorded this as a formal decision on October 11, 2026. The file name changed within a few months, so early tutorials already show the old address. On November 24, 2026 the spec also switched to [AI Catalog's naming format](https://github.com/ards-project/ard-spec/blob/main/adr/0011-adopt-ai-catalog-urn-grammar.md) for the ID each entry carries, `urn:air:<publisher>:<name>`. An ID that used extra colons, like `urn:air:acme.com:finance:trader`, is now read as a name plus a kind, so write `urn:air:acme.com:finance/trader` instead.
